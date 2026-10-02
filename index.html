@@ -68,6 +68,12 @@ ul.plain li { margin-bottom: 4px; }
 .statusbar .busytag { position: absolute; top: 8px; right: 12px; font-size: 12px; color: var(--muted); visibility: hidden; }
 .statusbar.busy .busytag { visibility: visible; }
 
+
+.timebar { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 68px; padding: 8px 16px; margin-bottom: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.timebar .lab { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.timebar .bigline { font-family: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1; white-space: nowrap; }
+.timebar .tb-sub { font-size: 13px; color: var(--muted); text-align: right; line-height: 1.3; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
 /* ---------- panels ---------- */
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
 .panel > details > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; min-height: 32px;
@@ -97,7 +103,7 @@ label.chk { display: flex; align-items: center; gap: 10px; padding: 6px 0; curso
 .timefield { display: flex; gap: 6px; align-items: center; }
 .timefield input { width: 64px; }
 .timefield span { color: var(--muted); font-size: 13px; }
-.evinfo { min-height: 66px; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.evinfo { min-height: 44px; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
 .evinfo .remain { color: var(--ink); font-weight: 600; font-size: 16px; margin-top: 2px; }
 #gemNote { min-height: 2.6em; }
 .pinfo, .limits { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; line-height: 1.4; }
@@ -164,6 +170,20 @@ tr.isrec td { font-weight: 600; background: var(--surface2); }
 .tl.pres { border-left-color: var(--warn); }
 .tl .expect { color: var(--ink); font-weight: 500; }
 
+
+.stepno { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-family: 'Instrument Sans', sans-serif; font-size: 12.5px; font-weight: 700; vertical-align: 2px; }
+.panel > details > summary .stepno { margin-right: 0; }
+.curgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.cur { display: flex; align-items: center; gap: 10px; }
+.cur input[type=number] { flex: 1; width: 100%; min-width: 0; }
+.cdline { font-size: 14px; margin: 2px 0 6px; }
+.cdline .cd { font-variant-numeric: tabular-nums; }
+.nxlabel { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.nxrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin: 6px 0 10px; }
+.nxrow label.nf { flex-direction: row; align-items: center; gap: 8px; }
+.nxrow label.nf b { color: var(--tc); min-width: 20px; }
+.nxrow label.nf input { flex: 1; min-width: 0; width: 100%; }
+
 /* ---------- tablet and phone ---------- */
 @media (max-width: 900px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
@@ -173,6 +193,7 @@ tr.isrec td { font-weight: 600; background: var(--surface2); }
   #sbCheck { height: 64px; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "big lab" "big sub"; column-gap: 14px; align-content: center; }
   #sbCheck .lab { grid-area: lab; align-self: end; } #sbCheck .bigline { grid-area: big; align-self: center; font-size: 24px; } #sbCheck .subline { grid-area: sub; align-self: start; -webkit-line-clamp: 1; }
   .sb { padding: 10px 14px; }
+  .timebar { height: 62px; padding: 8px 14px; } .timebar .bigline { font-size: 22px; } .timebar .tb-sub { font-size: 12px; max-width: 46%; }
   .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; }
   .tabs button { min-height: var(--tap); border: 0; background: transparent; border-radius: 10px; font-weight: 600; color: var(--muted); }
   .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
@@ -202,7 +223,7 @@ tr.isrec td { font-weight: 600; background: var(--surface2); }
   .grow .rc { grid-area: rc; text-align: left; } .grow .rc::before { content: "rec "; font-weight: 400; color: var(--muted); }
   .grow .mx { grid-area: mx; text-align: right; } .grow .mx::before { content: "max "; }
   .field { gap: 10px; }
-  .nxrow .nf { flex: 1 1 calc(50% - 10px); } .nxrow .nf input { width: 100%; }
+  .nxrow .nf { flex: 1 1 calc(50% - 10px); }
   .urow.locked { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "nm cs"; row-gap: 0; }
   .urow.locked input { display: none; }
   .buy { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "tag nm done" "tag cost done"; column-gap: 10px; row-gap: 2px; padding: 12px 0; }
@@ -227,10 +248,15 @@ tr.isrec td { font-weight: 600; background: var(--surface2); }
   <header class="top-head">
     <div>
       <h1>Event upgrade planner</h1>
-      <p class="sub">Enter your state and the time left. The planner simulates every run, check-in and prestige to the goal wave and tells you what to buy and when.</p>
+      <p class="sub">Enter your prestige, currency and upgrades. The planner works out what to buy and when to check in.</p>
     </div>
     <button id="btnReset" type="button" aria-label="Reset all inputs">Reset</button>
   </header>
+
+  <section class="timebar" id="timebar">
+    <div class="tb-main"><div class="lab" id="tbLab">Event time left</div><div class="bigline" id="tbBig">...</div></div>
+    <div class="tb-sub" id="tbSub"></div>
+  </section>
 
   <section class="statusbar" id="top" aria-live="polite">
     <div class="sb" id="sbMain"><span class="busytag">Updating</span><div class="lab" id="sbLab">Goal projection</div><div class="bigline" id="sbBig">Calculating</div><div class="subline" id="sbSub">Starting</div></div>
@@ -253,7 +279,7 @@ const Engine = (function () {
   'use strict';
 
   /* ---------- Enemy tables (index = wave, 1-based) ---------- */
-  const WMAX = 260;
+  const WMAX = 1005;   // enemy data runs well past W250 so a higher goal wave can be planned
   const EHP = [], EDMG = [], EAS = [], ECC = [], ECM = [];
   for (let w = 1; w <= WMAX; w++) {
     const i = w - 1;
@@ -444,6 +470,7 @@ const Engine = (function () {
     const avgP = playerAvgHit(st);
     for (let w = 1; w <= last; w++) {
       if (died) { // only the pace term still needs hits; a cheap estimate is enough
+        if (w > 260) break;
         pace += 5 * (Math.max(1, Math.ceil(EHP[w] / avgP)) / st.as + WALK / st.ms) / st.ev;
         continue;
       }
@@ -676,7 +703,7 @@ const Engine = (function () {
       const gain = adaptG ? Math.max(0, evalBuild(st, target, lambda).J - Jb) : 0;
       const prof = evalBuild(st, target, 0);
       if (prof.wave > maxWave) maxWave = prof.wave;
-      const full = prof.capable ? evalBuild(st, 251, 0) : prof;
+      const full = prof.capable ? evalBuild(st, Math.max(251, goal + 1), 0) : prof;
       const ev = { type: 'checkin', t, P, target, tier: pi < path.length ? path[pi][1] : null, before, buys, wave: prof.wave, cleared: full.cleared, x: full.x,
         capable: prof.capable, tTarget: prof.capable ? prof.tTarget : null, runMin: prof.runH * 60, hp: st.hp, dmg: st.dmg };
       if (o.debug) ev.lv = Object.assign({}, lv);
@@ -795,6 +822,7 @@ const Engine = (function () {
     if (raw) { hadSaved = true; const o = JSON.parse(raw); S = Object.assign(defaults(), o); S.gems = Object.assign(defaults().gems, o.gems || {}); }
   } catch (e) { /* storage unavailable */ }
   S.ui = S.ui || {};
+  S.curAt = S.curAt || S.lastCheckin || Date.now();
   if (S.ui.tab === undefined) S.ui.tab = hadSaved ? 'plan' : 'setup'; // first visit on a phone starts on Setup
   function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
   function isOpen(k, def) { return S.ui[k] === undefined ? def : !!S.ui[k]; }
@@ -832,6 +860,12 @@ const Engine = (function () {
     const m = Math.max(0, Math.round(h * 60));
     return Math.floor(m / 1440) + 'd ' + Math.floor((m % 1440) / 60) + 'h ' + (m % 60) + 'm';
   }
+  function durShort(h) {
+    const m = Math.max(1, Math.round(h * 60));
+    if (m < 60) return m + ' min';
+    if (m < 1440) return Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '');
+    return Math.floor(m / 1440) + 'd' + (Math.floor((m % 1440) / 60) ? ' ' + Math.floor((m % 1440) / 60) + 'h' : '');
+  }
   function ivLabel(h) { return h < 1 ? Math.round(h * 60) + ' min' : (h === 1 ? '1 hour' : h + ' hours'); }
   function tag(t) { return '<span class="tag t' + t + '">' + TIER_NAME[t] + '</span>'; }
   function clock(ms) {
@@ -866,6 +900,18 @@ const Engine = (function () {
   }
 
   /* ---------- state -> engine inputs ---------- */
+  // Level rules: locked by prestige tier, locked until the row above has a level, and capped by the tier's cap upgrades.
+  function clampLevels(P, rawLv) {
+    const lv = {}, raw = {};
+    for (let t = 1; t <= 4; t++) E.BY_TIER[t].forEach(u => {
+      let L = Math.max(0, Math.round(num(rawLv[u.id], 0)));
+      if (P < u.unlock || (u.prev && raw[u.prev.id] < 1)) L = 0;
+      raw[u.id] = L;
+    });
+    const order = E.UPG.slice().sort((a, b) => (a.kind === 'capcap' ? 0 : a.kind === 'cap' ? 1 : 2) - (b.kind === 'capcap' ? 0 : b.kind === 'cap' ? 1 : 2));
+    order.forEach(u => { lv[u.id] = clamp(raw[u.id], 0, E.maxLevel(u, lv)); });
+    return lv;
+  }
   function normalized() {
     const P = clamp(Math.round(num(S.P, 0)), 0, 49);
     const gm = E.gemMax(P);
@@ -874,19 +920,10 @@ const Engine = (function () {
       speed: clamp(Math.round(num(S.gems.speed, 0)), 0, gm.speed), x2: clamp(Math.round(num(S.gems.x2, 0)), 0, 1)
     };
     const gems = S.useGems ? ownedGems : { atk: 0, hp: 0, speed: 0, x2: 0 };
-    const lv = {};
-    // an upgrade only exists once the one above it in its tier has at least 1 level
-    const raw = {};
-    for (let t = 1; t <= 4; t++) E.BY_TIER[t].forEach(u => {
-      let L = Math.max(0, Math.round(num(S.lv[u.id], 0)));
-      if (P < u.unlock || (u.prev && raw[u.prev.id] < 1)) L = 0;
-      raw[u.id] = L;
-    });
-    const order = E.UPG.slice().sort((a, b) => (a.kind === 'capcap' ? 0 : a.kind === 'cap' ? 1 : 2) - (b.kind === 'capcap' ? 0 : b.kind === 'cap' ? 1 : 2));
-    order.forEach(u => { lv[u.id] = clamp(raw[u.id], 0, E.maxLevel(u, lv)); });
+    const lv = clampLevels(P, S.lv);
     const es = eventState();
     return { P, gems, ownedGems, lv, cur: S.cur.map(v => Math.max(0, num(v, 0))), remainH: clamp(es.remainH, 0.25, 24 * 120), T0: es.T0,
-      goal: clamp(Math.round(num(S.goal, 250)), 5, 250), interval: S.interval === 'auto' ? 'auto' : num(S.interval, 1),
+      goal: clamp(Math.round(num(S.goal, 250)), 5, 1000), interval: S.interval === 'auto' ? 'auto' : num(S.interval, 1),
       gm,
       prevGapH: S.lastCheckin ? clamp((es.now - S.lastCheckin) / 3600000, 0.05, 48) : null };
   }
@@ -899,38 +936,36 @@ const Engine = (function () {
       (opts.max != null ? ' max="' + opts.max + '"' : '') + '></div>';
   }
   function buildInputs() {
-    let h = '<section class="panel"><h2>Event</h2><div class="evinfo" id="evInfo"></div>';
-    h += '<label class="chk"><input type="checkbox" id="in_manual"' + (S.manual ? ' checked' : '') + '> Set the time remaining manually</label>';
-    h += '<div id="manualTime"' + (S.manual ? '' : ' hidden') + '><div class="field"><label>Time remaining</label><div class="timefield">' +
+    let h = '';
+    // 0. Event settings
+    h += '<section class="panel"><h2><span class="stepno">0</span>Event Settings</h2>' + field('Wave goal', 'in_goal', S.goal, { min: 5, hint: 'Default 250' });
+    h += '<div class="field"><label for="in_interval">Check-in interval</label><select id="in_interval"><option value="auto">Auto</option>' + INTERVALS.map(v => '<option value="' + v + '">' + ivLabel(v) + '</option>').join('') + '</select></div>';
+    h += '<p class="note" id="ivDesc">' + lastIvDesc + '</p>';
+    h += '<label class="chk"><input type="checkbox" id="in_manual"' + (S.manual ? ' checked' : '') + '> Set the time left manually</label>';
+    h += '<div id="manualTime"' + (S.manual ? '' : ' hidden') + '><div class="field"><label>Time left</label><div class="timefield">' +
       '<input type="number" inputmode="numeric" id="in_days" min="0" value="' + S.days + '"><span>d</span>' +
       '<input type="number" inputmode="numeric" id="in_hours" min="0" value="' + S.hours + '"><span>h</span>' +
-      '<input type="number" inputmode="numeric" id="in_mins" min="0" value="' + S.mins + '"><span>m</span></div></div></div>';
-    h += field('Goal wave', 'in_goal', S.goal, { min: 5, max: 250, hint: 'Wave 5 to 250. Default is W250.' });
-    h += '<div class="field"><label for="in_interval">Check-in interval<small>Auto varies the interval: short while visits pay off, longer when currency builds slowly.</small></label>' +
-      '<select id="in_interval"><option value="auto">Auto</option>' + INTERVALS.map(v => '<option value="' + v + '">' + ivLabel(v) + '</option>').join('') + '</select></div>';
-    h += '</section>';
-
-    h += '<section class="panel"><details data-k="iv"' + (isOpen('iv', false) ? ' open' : '') + '><summary>Check-In Interval Breakpoints</summary><div id="ivBody">' + (lastIvHtml || '<p class="note">Calculating the interval options.</p>') + '</div></details></section>';
-
-    h += '<section class="panel" id="gemsPanel"><details data-k="gems"' + (isOpen('gems', true) ? ' open' : '') + '><summary>Gems</summary><p class="note" id="gemNote">Gems are optional.</p>';
+      '<input type="number" inputmode="numeric" id="in_mins" min="0" value="' + S.mins + '"><span>m</span></div></div></div></section>';
+    // 1. Prestige
+    h += '<section class="panel"><h2><span class="stepno">1</span>Prestige</h2>' + field('Prestige tier', 'in_P', S.P, { min: 0, max: 49, hint: '0 to 49' }) + '<p class="pinfo" id="presInfo"></p></section>';
+    // 2. Currency
+    h += '<section class="panel"><h2><span class="stepno">2</span>Event Currency</h2><div class="curgrid">';
+    for (let t = 1; t <= 4; t++) h += '<label class="cur t' + t + '" for="in_cur' + t + '"><span class="tag t' + t + '">T' + t + '</span><input type="number" inputmode="decimal" id="in_cur' + t + '" min="0" value="' + S.cur[t - 1] + '" aria-label="Tier ' + t + ' currency"></label>';
+    h += '</div></section>';
+    // 3. Gems
+    h += '<section class="panel" id="gemsPanel"><details data-k="gems"' + (isOpen('gems', true) ? ' open' : '') + '><summary><span class="stepno">3</span>Gems</summary><p class="note" id="gemNote">Gems are optional.</p>';
     h += '<label class="chk"><input type="checkbox" id="in_usegems"' + (S.useGems ? ' checked' : '') + '> Use gems</label>';
     h += '<div id="gemFields"' + (S.useGems ? '' : ' hidden') + '>';
     h += '<div class="colhead g"><span>Gem upgrade</span><span>Rec.</span><span>Level</span><span>Max</span></div>';
-    const gemRow = (key, label, input, x2) => '<div class="grow"><div class="nm">' + label + '</div><span class="rc" id="rec_' + key + '">-</span>' + input + '<span class="mx" id="max_' + key + '"></span></div>';
+    const gemRow = (key, label, input) => '<div class="grow"><div class="nm">' + label + '</div><span class="rc" id="rec_' + key + '">-</span>' + input + '<span class="mx" id="max_' + key + '"></span></div>';
     h += gemRow('hp', 'Max HP <i>+10% each</i>', '<input type="number" inputmode="numeric" min="0" id="in_ghp" value="' + S.gems.hp + '" aria-label="Max HP gem level">');
     h += gemRow('atk', 'Attack Damage <i>+10% each</i>', '<input type="number" inputmode="numeric" min="0" id="in_gatk" value="' + S.gems.atk + '" aria-label="Attack Damage gem level">');
     h += gemRow('speed', 'Event Speed <i>+125% each</i>', '<input type="number" inputmode="numeric" min="0" id="in_gspeed" value="' + S.gems.speed + '" aria-label="Event Speed gem level">');
     h += gemRow('x2', '2x Event Currency', '<input type="checkbox" id="in_gx2"' + (S.gems.x2 ? ' checked' : '') + ' aria-label="2x Event Currency owned">');
     h += '<p class="limits" id="gemLimits"></p><p class="note" id="gemSummary"></p></div></details></section>';
-
-    h += '<section class="panel"><details data-k="prestige"' + (isOpen('prestige', true) ? ' open' : '') + '><summary>Prestige</summary>' + field('Current prestige tier', 'in_P', S.P, { min: 0, max: 49, hint: 'Whole number from 0 to 49. It sets which upgrades and gem levels are open to you.' }) + '<p class="pinfo" id="presInfo"></p></details></section>';
-
-    h += '<section class="panel"><h2>Event Currency</h2>';
-    for (let t = 1; t <= 4; t++) h += field('<span class="tag t' + t + '">' + TIER_NAME[t] + '</span> Tier ' + t + ' currency', 'in_cur' + t, S.cur[t - 1], { min: 0 });
-    h += '</section>';
-
-    h += '<section class="panel"><details data-k="upgrades"' + (isOpen('upgrades', true) ? ' open' : '') + '><summary><span>Upgrades</span><span class="sumcount" id="upSum"></span></summary>';
-    h += '<p class="note">Levels you own now. Purchases apply from your next run. Locked rows open up with your prestige tier, or once you own at least 1 level of the upgrade above them. Levels cannot go past the maximum shown.</p>';
+    // 4. Upgrades
+    h += '<section class="panel"><details data-k="upgrades"' + (isOpen('upgrades', true) ? ' open' : '') + '><summary><span class="stepno">4</span><span>Upgrades</span><span class="sumcount" id="upSum"></span></summary>';
+    h += '<p class="note">Locked rows open with your prestige tier or the row above.</p>';
     h += '<div class="colhead"><span>Upgrade</span><span>Level</span><span>Max</span><span>Next</span></div>';
     for (let t = 1; t <= 4; t++) {
       h += '<div class="tierhead plain t' + t + '"><b>Tier ' + t + '</b><span class="tc" id="tc_' + t + '"></span></div>';
@@ -941,7 +976,6 @@ const Engine = (function () {
       });
     }
     h += '</details></section>';
-    h += '<div class="row2"><button class="primary" type="button" id="btnCalc">Update plan</button></div>';
     $('#inputs').innerHTML = h;
     $('#in_interval').value = String(S.interval);
     wire();
@@ -978,17 +1012,16 @@ const Engine = (function () {
       openAll += o;
       const el = $('#tc_' + t); if (el) el.textContent = o + ' of ' + list.length + ' open';
     }
-    const us = $('#upSum'); if (us) us.textContent = openAll + ' of ' + E.UPG.length + ' open at P' + n.P;
+    const us = $('#upSum'); if (us) us.textContent = openAll + ' of ' + E.UPG.length + ' open';
     const pi = $('#presInfo');
     if (pi) {
       let nextP = null;
       E.UPG.forEach(u => { if (u.unlock > n.P && (nextP === null || u.unlock < nextP)) nextP = u.unlock; });
       const names = nextP === null ? [] : E.UPG.filter(u => u.unlock === nextP).map(u => u.name);
-      pi.textContent = 'At P' + n.P + ' the prestige multiplier is x' + f2(1 + 0.1 * n.P) + ' before Prestige Bonus upgrades, and ' + openAll + ' of ' + E.UPG.length + ' upgrades are open. ' +
-        (nextP === null ? 'Every upgrade is open.' : 'Next unlock at P' + nextP + ': ' + names.slice(0, 2).join(', ') + (names.length > 2 ? ' and ' + (names.length - 2) + ' more' : '') + '.');
+      pi.textContent = nextP === null ? 'Every upgrade is open.' : 'Next unlock at P' + nextP + ': ' + names.slice(0, 2).join(', ') + (names.length > 2 ? ' and ' + (names.length - 2) + ' more' : '') + '.';
     }
     const gl = $('#gemLimits');
-    if (gl) gl.textContent = 'At P' + n.P + ': Max HP and Attack go up to ' + n.gm.hp + ' (5 + tier) and Event Speed up to ' + n.gm.speed + '. Event Speed levels 2 and 3 open at P5 and P10.';
+    if (gl) gl.textContent = 'Max at P' + n.P + ': HP and Attack ' + n.gm.hp + ', Event Speed ' + n.gm.speed + '.';
     // gem levels: max depends on the prestige tier
     const gm = n.gm;
     [['hp', 'in_ghp', gm.hp], ['atk', 'in_gatk', gm.atk], ['speed', 'in_gspeed', gm.speed]].forEach(([k, id, mx]) => {
@@ -1001,13 +1034,13 @@ const Engine = (function () {
     const pEl = $('#in_P'); if (pEl && num(pEl.value, 0) > 49) { pEl.value = 49; S.P = 49; }
   }
   function renderEventInfo() {
-    const el = $('#evInfo'); if (!el) return;
     const es = eventState();
-    let h;
-    if (!es.started) h = '<div>The next event starts ' + longClock(es.w.start) + ', in ' + dur((es.w.start - es.now) / 3600000) + '. The plan assumes you begin then.</div>';
-    else h = '<div>The event ends ' + longClock(es.w.end) + '. Events end at 10 PM UTC on the last day of the month.</div>';
-    h += '<div class="remain">' + (S.manual ? 'Manual time remaining: ' : 'Time remaining: ') + dur(es.remainH) + '</div>';
-    el.innerHTML = h;
+    const lab = $('#tbLab'), big = $('#tbBig'), sub = $('#tbSub');
+    if (!lab) return;
+    if (!es.started) { lab.textContent = 'Event starts in'; big.textContent = dur((es.w.start - es.now) / 3600000); sub.textContent = 'Starts ' + longClock(es.w.start); return; }
+    lab.textContent = S.manual ? 'Time left (set manually)' : 'Event time left';
+    big.textContent = dur(es.remainH);
+    sub.textContent = S.manual ? 'The real event ends ' + longClock(es.w.end) : 'Ends ' + longClock(es.w.end);
   }
 
   let timer = null;
@@ -1020,16 +1053,86 @@ const Engine = (function () {
       setter(el.value); refreshRows(); save(); renderEventInfo(); schedule();
     });
   }
+  // Lowering or clearing a field can trim other fields (a cap upgrade lowers the other rows' maximums, a row at 0 locks
+  // the rows below it, a lower prestige tier locks upgrades). So while typing, only increases are applied. A lower or empty
+  // value waits until the field loses focus, and if it would change other fields the player is asked first.
+  function guardedField(el, o) {
+    let before = 0, busy = false;
+    el.addEventListener('focus', () => { before = o.before(); });
+    el.addEventListener('input', () => {
+      if (o.hardMax != null && num(el.value, 0) > o.hardMax) el.value = o.hardMax;
+      const raw = el.value.trim(), v = raw === '' ? NaN : Math.round(parseFloat(raw));
+      // increases apply at once; a lower value also applies at once when it cannot trim anything else
+      if (isFinite(v) && (v >= before || (!o.always && o.affected(Math.max(0, v)).length === 0))) { o.commit(Math.max(0, v)); refreshRows(); save(); renderEventInfo(); schedule(); }
+    });
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); });
+    el.addEventListener('blur', () => {
+      if (busy) return;
+      busy = true;
+      try {
+        const raw = el.value.trim();
+        const v = raw === '' ? 0 : Math.max(0, Math.round(parseFloat(raw)) || 0);
+        const cleared = raw === '' && before > 0;
+        if (v < before) {
+          const aff = o.affected(v);
+          if ((aff.length || o.always) && !window.confirm(o.message(v, cleared, before, aff))) { o.commit(before); el.value = before; refreshRows(); save(); schedule(); return; }
+        }
+        o.commit(v); el.value = v;
+        refreshRows(); save(); renderEventInfo(); schedule();
+      } finally { busy = false; }
+    });
+  }
+  function lossList(aff) {
+    return aff.slice(0, 4).map(a => a.name + ' ' + a.before + ' to ' + a.after).join('; ') + (aff.length > 4 ? '; and ' + (aff.length - 4) + ' more' : '');
+  }
+  function guardUpgrade(u) {
+    const el = $('#lv_' + u.id); if (!el) return;
+    const isCap = u.kind === 'cap' || u.kind === 'capcap';
+    guardedField(el, {
+      before: () => normalized().lv[u.id],
+      commit: v => { S.lv[u.id] = v; },
+      always: isCap,
+      affected: v => {
+        const P = normalized().P, b = clampLevels(P, S.lv), a = clampLevels(P, Object.assign({}, S.lv, { [u.id]: v }));
+        return E.UPG.filter(w => w.id !== u.id && a[w.id] < b[w.id]).map(w => ({ name: w.name, before: b[w.id], after: a[w.id] }));
+      },
+      message: (v, cleared, before, aff) => {
+        if (isCap) {
+          const scope = u.kind === 'capcap' ? 'every tier cap upgrade' : 'the other Tier ' + u.tier + ' upgrades';
+          return (cleared ? 'You cleared "' + u.name + '", which had ' + before + ' levels. That sets it to 0.' : '"' + u.name + '" is now ' + v + ', lower than the ' + before + ' you had.') +
+            ' This also lowers the maximum of ' + scope + (aff.length ? ', so these levels will be reduced: ' + lossList(aff) + '.' : '. None of your current levels are above the new maximums.') + '\n\nKeep this value?';
+        }
+        return (cleared ? 'You cleared "' + u.name + '". ' : 'Setting "' + u.name + '" to ' + v + ' ') + 'locks the rows below it in Tier ' + u.tier + ', so these levels will reset: ' + lossList(aff) + '.\n\nKeep this value?';
+      }
+    });
+  }
+  function guardPrestige() {
+    const el = $('#in_P'); if (!el) return;
+    guardedField(el, {
+      before: () => normalized().P,
+      hardMax: 49,
+      commit: v => { S.P = v; },
+      always: false,
+      affected: v => {
+        const n = normalized(), b = clampLevels(n.P, S.lv), a = clampLevels(v, S.lv), gm = E.gemMax(v), out = [];
+        E.UPG.forEach(w => { if (a[w.id] < b[w.id]) out.push({ name: w.name, before: b[w.id], after: a[w.id] }); });
+        [['Max HP gem', n.ownedGems.hp, gm.hp], ['Attack Damage gem', n.ownedGems.atk, gm.atk], ['Event Speed gem', n.ownedGems.speed, gm.speed]].forEach(([nm, cur, mx]) => { if (cur > mx) out.push({ name: nm, before: cur, after: mx }); });
+        return out;
+      },
+      message: (v, cleared, before, aff) => (cleared ? 'You cleared the prestige tier, which was ' + before + '. That sets it to P0, ' : 'Setting the prestige tier to P' + v + ' (from P' + before + ') ') + 'which locks upgrades and lowers the gem limits, so these will be reduced: ' + lossList(aff) + '.\n\nKeep this value?'
+    });
+  }
   function wire() {
     document.querySelectorAll('#inputs input[type=number]').forEach(el => {
       el.setAttribute('autocomplete', 'off'); el.setAttribute('enterkeyhint', 'done');
       el.addEventListener('focus', () => setTimeout(() => { try { el.select(); } catch (e) { /* ignore */ } }, 0)); // easy to overwrite on a phone
     });
     bindNum('in_days', v => S.days = v, 31); bindNum('in_hours', v => S.hours = v, 23); bindNum('in_mins', v => S.mins = v, 59);
-    bindNum('in_goal', v => S.goal = v, 250); bindNum('in_P', v => S.P = v, 49);
+    bindNum('in_goal', v => S.goal = v); 
     bindNum('in_ghp', v => S.gems.hp = v); bindNum('in_gatk', v => S.gems.atk = v); bindNum('in_gspeed', v => S.gems.speed = v);
-    for (let t = 1; t <= 4; t++) bindNum('in_cur' + t, v => S.cur[t - 1] = v);
-    E.UPG.forEach(u => bindNum('lv_' + u.id, v => S.lv[u.id] = v));
+    for (let t = 1; t <= 4; t++) bindNum('in_cur' + t, v => { S.cur[t - 1] = v; S.curAt = Date.now(); });
+    E.UPG.forEach(u => guardUpgrade(u));
+    guardPrestige();
     $('#in_interval').addEventListener('change', e => { S.interval = e.target.value; save(); compute(); });
     $('#in_gx2').addEventListener('change', e => { S.gems.x2 = e.target.checked ? 1 : 0; save(); schedule(); });
     $('#in_usegems').addEventListener('change', e => {
@@ -1044,7 +1147,6 @@ const Engine = (function () {
       }
       $('#manualTime').hidden = !S.manual; save(); renderEventInfo(); compute();
     });
-    $('#btnCalc').addEventListener('click', compute);
     $('#btnCalcMobile').addEventListener('click', () => { setTab('plan'); window.scrollTo(0, 0); compute(); });
   }
   $('#btnReset').addEventListener('click', () => {
@@ -1059,7 +1161,7 @@ const Engine = (function () {
   }
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
   setTab(S.ui.tab);
-  setInterval(renderEventInfo, 30000);
+  setInterval(() => tick(), 20000);
 
   /* ---------- optimiser pipeline ---------- */
   function better(a, b) {
@@ -1083,17 +1185,6 @@ const Engine = (function () {
       if (!best || better(r, best)) best = r;
     }
     const lambda = best.lambda;
-    const table = [];
-    let top = null, stop = false;
-    for (let i = 0; i < INTERVALS.length; i++) {
-      const iv = INTERVALS[i];
-      if (stop) { table.push({ iv, r: null }); continue; }
-      yield 'intervals';
-      const r = iv === 1 ? best : sim(n, iv, lambda);
-      table.push({ iv, r });
-      if (!top || better(r, top.r)) top = { iv, r };
-      if (top.r.attainable ? (!r.attainable || r.completionH > top.r.completionH * 1.6) : (r.maxWave < top.r.maxWave - 5)) stop = true;
-    }
     let chosen, policy, adaptTable = [];
     if (n.interval === 'auto') {
       let topA = null;
@@ -1113,9 +1204,8 @@ const Engine = (function () {
       chosen = pick.r; policy = { type: 'auto', G: pick.G, arg: { G: pick.G } };
     } else {
       const iv = n.interval;
-      let c = table.find(x => x.iv === iv && x.r);
-      if (!c) { yield 'own'; c = { iv, r: sim(n, iv, lambda) }; }
-      chosen = c.r; policy = { type: 'fixed', iv, arg: iv };
+      yield 'own';
+      chosen = sim(n, iv, lambda); policy = { type: 'fixed', iv, arg: iv };
     }
     // look for a faster prestige route; the standard route stays as the fallback
     let usedPath = null, pathInfo = null;
@@ -1156,13 +1246,13 @@ const Engine = (function () {
       if (ext.attainable) needH = ext.completionH;
       extMax = ext.maxWave;
     }
-    return { table, adaptTable, policy, chosen, lambda, needH, extMax, pathArg, pathInfo, maxed };
+    return { adaptTable, policy, chosen, lambda, needH, extMax, pathArg, pathInfo, maxed };
   }
 
   let token = 0;
   let PLAN = null;
   let lastGemInfo = null;
-  let lastIvHtml = '';
+  let lastIvDesc = '';
   function setBusy(b) { $('#top').classList.toggle('busy', b); }
   function compute() {
     clearTimeout(timer);
@@ -1181,7 +1271,7 @@ const Engine = (function () {
   }
 
   /* ---------- plan helpers ---------- */
-  function curLine(c) { return [0, 1, 2, 3].map(i => TIER_NAME[i + 1] + ' ' + fmt(c[i])).join(', '); }
+  function curLine(c) { return [0, 1, 2, 3].filter(i => c[i] > 0.5).map(i => TIER_NAME[i + 1] + ' ' + fmt(c[i])).join(', ') || 'nothing'; }
   // Steps follow the real purchase order. A cap upgrade level closes the earlier steps of its tier, so a later level of an
   // already-capped upgrade becomes its own step after the cap purchase instead of being folded into the earlier one.
   function mergeSteps(buys) {
@@ -1200,8 +1290,87 @@ const Engine = (function () {
     for (let t = 1; t <= 4; t++) { const el = $('#in_cur' + t); if (el) el.value = S.cur[t - 1]; }
     E.UPG.forEach(u => { const el = $('#lv_' + u.id); if (el) el.value = S.lv[u.id] || 0; });
   }
+  function shortClock(ms) {
+    const d = new Date(ms), t = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString(undefined, { weekday: 'short' }) + ' ' + t;
+  }
+  function fmtIn(ms) {
+    if (ms <= 30000) return 'now';
+    const m = Math.ceil(ms / 60000);
+    if (m < 60) return 'in ' + m + ' min';
+    const h = Math.floor(m / 60);
+    if (h < 24) return 'in ' + h + 'h ' + (m % 60) + 'm';
+    return 'in ' + Math.floor(h / 24) + 'd ' + (h % 24) + 'h';
+  }
 
-  /* ---------- Next step: one panel that follows the Upgrade Plan (buy, then check in or prestige) ---------- */
+  /* ---------- live check-in time: when you will hold enough for the next upgrade set ---------- */
+  function ciModel() {
+    const n = normalized();
+    const pend = PLAN.steps.filter(s => !s.done);
+    const lv2 = Object.assign({}, n.lv); pend.forEach(s => { lv2[s.id] = s.to; });
+    const st2 = E.computeStats(n.P, n.gems, lv2);
+    const prof = E.evalBuild(st2, PLAN.target, 0);
+    const inc = E.incomePerRun(prof.cleared, n.gems, st2);
+    return { n, pend, rate: inc.map(v => v / prof.runH) };
+  }
+  function dynCheckin(heldOverride) {
+    const m = ciModel(), now = Date.now();
+    let held;
+    if (heldOverride) held = heldOverride.slice();                       // what the player typed as held right now
+    else {
+      const hrs = clamp((now - (S.curAt || now)) / 3600000, 0, 72);      // currency earned since it was last confirmed
+      held = m.n.cur.map((c, k) => c + m.rate[k] * hrs);
+      m.pend.forEach(s => { held[s.tier - 1] -= s.cost; });              // minus what the pending purchases will spend
+    }
+    const need = [0, 0, 0, 0];
+    if (PLAN.nextEv) PLAN.nextEv.buys.forEach(b => { need[b.tier - 1] += b.cost; });
+    const hasSet = need.some(v => v > 0);
+    let t = 0, stuck = false;
+    if (hasSet) {
+      for (let k = 0; k < 4; k++) {
+        const gap = need[k] - held[k];
+        if (gap > 0) { if (m.rate[k] > 0) t = Math.max(t, gap / m.rate[k]); else stuck = true; }
+      }
+    } else t = PLAN.nextWait;
+    t = clamp(stuck ? 48 : t, 0, 48);
+    if (t < 1 / 60) t = 0;
+    return { t, at: now + t * 3600000, need, held, hasSet };
+  }
+  function ciNeedText(ci) {
+    if (!ci.hasSet) return 'Nothing worth buying before then.';
+    if (ci.t <= 0) return 'You hold enough for the next set (' + curLine(ci.need) + '). Enter your currency and press Check-in done.';
+    return 'To afford the next set: ' + curLine(ci.need) + '.';
+  }
+  function updateStatusCheckin() {
+    if (!PLAN) return;
+    const lab = $('#sbCheck .lab'), big = $('#ckBig'), sub = $('#ckSub');
+    if (PLAN.view === 'prestige') { lab.textContent = 'Next step'; big.textContent = 'Prestige'; sub.textContent = 'at wave ' + PLAN.target + ' for P' + PLAN.tier; return; }
+    if (PLAN.view === 'finish') { lab.textContent = 'Next step'; big.textContent = 'Goal run'; sub.textContent = 'W' + PLAN.n.goal; return; }
+    const ci = PLAN.ci; if (!ci) return;
+    lab.textContent = 'Next check-in';
+    big.textContent = fmtIn(ci.at - Date.now()).replace(/^in /, '');
+    sub.textContent = ci.t <= 0 ? 'You can buy the next set' : shortClock(ci.at);
+  }
+  function updateCiText() {
+    const ci = PLAN && PLAN.ci; if (!ci) return;
+    const clockEl = $('#ciClock'); if (clockEl) clockEl.textContent = ci.t <= 0 ? 'Check in now' : shortClock(ci.at);
+    const cd = $('#ciCd'); if (cd) { cd.dataset.at = ci.at; cd.textContent = fmtIn(ci.at - Date.now()); cd.hidden = ci.t <= 0; }
+    const nd = $('#ciNeed'); if (nd) nd.textContent = ciNeedText(ci);
+    updateStatusCheckin();
+  }
+  function tick() {
+    renderEventInfo();
+    if (!PLAN) return;
+    if (PLAN.view === 'checkin' && !PLAN.boxDirty) {
+      PLAN.ci = dynCheckin();
+      for (let t = 1; t <= 4; t++) { const el = $('#nx_c' + t); if (el && document.activeElement !== el) el.value = Math.max(0, Math.round(PLAN.ci.held[t - 1])); }
+      updateCiText();
+    }
+    document.querySelectorAll('.cd[data-at]').forEach(el => { el.textContent = fmtIn(+el.dataset.at - Date.now()); if (el.id === 'ciCd') el.hidden = !!(PLAN.ci && PLAN.ci.t <= 0); });
+    updateStatusCheckin();
+  }
+
+  /* ---------- Next step: one panel that follows the plan (buy, then check in or prestige) ---------- */
   function renderStep() {
     const el = $('#stepPanel'); if (!el || !PLAN) return;
     const steps = PLAN.steps;
@@ -1209,106 +1378,107 @@ const Engine = (function () {
     const n = normalized();
     const st = E.computeStats(n.P, n.gems, n.lv);
     const prof = E.evalBuild(st, PLAN.target, 0);
-    const now = Date.now();
+    PLAN.boxDirty = false;
+    if (pending) PLAN.view = 'buy';
+    else if (prof.capable && PLAN.tier == null) PLAN.view = 'finish';
+    else if (prof.capable) PLAN.view = 'prestige';
+    else PLAN.view = 'checkin';
+    PLAN.ci = (PLAN.view === 'buy' || PLAN.view === 'checkin') ? dynCheckin() : null;
     let h = '';
-    PLAN.view = 'buy';
-    if (pending) {
+    if (PLAN.view === 'buy') {
       const firstOpen = steps.findIndex(s => !s.done);
-      h = '<h2>Buy now</h2><p class="note">Buy these in order and press Done after each one. Done takes the cost off your held currency and sets the upgrade level. They take effect when your next run starts.</p>';
+      h = '<h2>Buy now</h2>';
       steps.forEach((s, i) => {
         const isNext = i === firstOpen;
         h += '<div class="buy t' + s.tier + (s.done ? ' done' : '') + '">' + tag(s.tier) + '<div class="nm">' + s.name + '<div class="lv">level ' + s.from + ' to ' + s.to + '</div></div>' +
           '<div class="cost">' + fmt(s.cost) + '</div><button type="button" class="donebtn' + (isNext ? ' primary' : '') + '" data-step="' + i + '"' + (isNext ? '' : ' disabled title="Finish the step above first"') + '>Done</button></div>';
       });
-      h += '<div class="row2" style="margin-top:10px"><button type="button" id="btnAllDone">Mark all done</button></div>';
-      h += '<p class="note" style="margin-top:8px">After these you should be able to clear about ' + wl(PLAN.x) + '. The next prestige target is wave ' + PLAN.target + (PLAN.tier != null ? ' for P' + PLAN.tier : '') + '.' + hpNote(PLAN.hp, PLAN.target) + '</p>';
+      h += '<div class="row2" style="margin-top:10px"><button type="button" id="btnAllDone">Mark all done</button><span class="note">Expect to clear about ' + wl(PLAN.x) + ' after these.</span></div>';
+    } else if (PLAN.view === 'finish') {
+      h = '<h2>Goal run</h2><p>Your build can reach W' + n.goal + '. A run takes about ' + dur(prof.tTarget) + '. No more purchases are needed.</p>';
+    } else if (PLAN.view === 'prestige') {
+      h = '<h2>Prestige for P' + PLAN.tier + '</h2><p>Your build can reach wave ' + PLAN.target + ' in about ' + dur(prof.tTarget) + '. Prestige when the run gets there. It resets non-gem upgrades and currency.</p>' +
+        '<div class="row2"><button type="button" class="primary" id="btnPrestigeDone">Prestige done</button></div>';
     } else {
-      const lead = steps.length ? '<p class="ok-t">All purchases done.</p>' : '<p class="note">Nothing is worth buying with the currency you hold yet.</p>';
-      if (prof.capable && PLAN.tier == null) {
-        PLAN.view = 'finish';
-        h = '<h2>Next</h2>' + lead + '<p>Your build can reach W' + n.goal + '. A run takes about ' + dur(prof.tTarget) + ' to get there, around ' + clock(now + prof.tTarget * 3600000) + ' if one starts now. No more purchases are needed.</p>';
-      } else if (prof.capable) {
-        PLAN.view = 'prestige';
-        h = '<h2>Next: prestige</h2>' + lead + '<div class="waitbig">Prestige for P' + PLAN.tier + '</div>' +
-          '<p>Your current build can reach wave ' + PLAN.target + '. A run takes about ' + dur(prof.tTarget) + ' to get there. Check in when the run reaches wave ' + PLAN.target + ' and prestige. That resets your non-gem upgrades and currency.</p>' +
-          '<div class="row2"><button type="button" class="primary" id="btnPrestigeDone">Prestige done</button></div>';
-      } else {
-        PLAN.view = 'checkin';
-        const wait = PLAN.nextWait;
-        const inc = E.incomePerRun(prof.cleared, n.gems, st);
-        const expect = n.cur.map((c, k) => c + inc[k] / prof.runH * wait);
-        h = '<h2>Next check-in</h2>' + lead + '<div class="waitbig">Check in at ' + clock(now + wait * 3600000) + '</div>' +
-          '<p class="note">That is ' + ivLabel(wait) + ' from now. Your current build is expected to clear about ' + wl(prof.x) + ', so the prestige at wave ' + PLAN.target + ' is not available yet. Enter what you hold when you check in. The boxes start with the estimate.</p><div class="nxrow">' +
-          [1, 2, 3, 4].map(t => '<div class="nf t' + t + '"><b>' + TIER_NAME[t] + ' currency</b><input type="number" inputmode="decimal" min="0" id="nx_c' + t + '" value="' + Math.round(expect[t - 1]) + '"></div>').join('') + '</div>' +
-          '<div class="row2"><button type="button" class="primary" id="btnCheckinDone">Check-in done</button></div>';
-      }
+      const ci = PLAN.ci;
+      h = '<h2>Next check-in</h2><div class="waitbig" id="ciClock">' + (ci.t <= 0 ? 'Check in now' : shortClock(ci.at)) + '</div>' +
+        '<div class="cdline"><b class="cd" id="ciCd"' + (ci.t <= 0 ? ' hidden' : '') + ' data-at="' + ci.at + '">' + fmtIn(ci.at - Date.now()) + '</b> <span id="ciNeed">' + ciNeedText(ci) + '</span></div>' +
+        '<div class="nxlabel">Currency you hold now</div><div class="nxrow">' +
+        [1, 2, 3, 4].map(t => '<label class="nf t' + t + '"><b>T' + t + '</b><input type="number" inputmode="decimal" min="0" id="nx_c' + t + '" value="' + Math.max(0, Math.round(ci.held[t - 1])) + '" autocomplete="off" enterkeyhint="done"></label>').join('') + '</div>' +
+        '<div class="row2"><button type="button" class="primary" id="btnCheckinDone">Check-in done</button></div>';
     }
     el.innerHTML = h;
     el.querySelectorAll('.donebtn').forEach(b => b.addEventListener('click', () => doneStep(+b.getAttribute('data-step'))));
     const all = $('#btnAllDone'); if (all) all.addEventListener('click', () => { PLAN.steps.forEach((s, i) => { if (!s.done) applyStep(i); }); finishStepUpdate(); });
     const b1 = $('#btnCheckinDone'); if (b1) b1.addEventListener('click', checkinDone);
     const b2 = $('#btnPrestigeDone'); if (b2) b2.addEventListener('click', prestigeDone);
+    [1, 2, 3, 4].forEach(t => {
+      const box = $('#nx_c' + t); if (!box) return;
+      box.addEventListener('focus', () => setTimeout(() => { try { box.select(); } catch (e) { /* ignore */ } }, 0));
+      box.addEventListener('input', () => {
+        PLAN.boxDirty = true;
+        PLAN.ci = dynCheckin([1, 2, 3, 4].map(k => Math.max(0, num($('#nx_c' + k).value, 0))));   // the time to check in follows what you type
+        updateCiText();
+      });
+    });
+    updateStatusCheckin();
     renderPlan();
   }
   function applyStep(i) {
     const s = PLAN.steps[i]; if (s.done) return;
     S.cur[s.tier - 1] = Math.max(0, Math.round((num(S.cur[s.tier - 1], 0) - s.cost) * 100) / 100);
     S.lv[s.id] = s.to;
+    S.curAt = Date.now();
     s.done = true;
   }
   function finishStepUpdate() { syncInputs(); save(); refreshRows(); renderStep(); }
   function doneStep(i) { applyStep(i); finishStepUpdate(); }
-
-  /* ---------- Upgrade Plan: always the next upgrade block and check-in block, the rest collapsed ---------- */
-  function renderPlan() {
-    const el = $('#planPanel'); if (!el || !PLAN) return;
-    const all = PLAN.cards || [];
-    // the Next step panel already shows the current block; when it is a check-in or prestige, skip that first card
-    const skip = PLAN.view === 'buy' ? 0 : 1;
-    const cards = all.slice(skip);
-    let h = '<h2>Upgrade Plan</h2><p class="note">Times use your local clock, counted from ' + clock(PLAN.n.T0) + '. The next upgrade block and check-in block are shown. Prestige appears only after the purchases before it would make the prestige wave reachable.</p>';
-    if (!cards.length) h += '<p>No further steps.</p>';
-    else {
-      h += '<div class="timeline">' + cards.slice(0, 2).join('') + '</div>';
-      if (cards.length > 2) h += '<details data-k="planrest"' + (isOpen('planrest', false) ? ' open' : '') + ' style="margin-top:8px"><summary>Show ' + Math.min(cards.length - 2, 240) + ' remaining steps</summary><div class="timeline" style="margin-top:8px">' + cards.slice(2, 242).join('') + '</div></details>';
-    }
-    el.innerHTML = h;
-  }
   function checkinDone() {
     for (let t = 1; t <= 4; t++) S.cur[t - 1] = Math.max(0, num($('#nx_c' + t).value, 0));
-    S.lastCheckin = Date.now();
+    S.lastCheckin = Date.now(); S.curAt = S.lastCheckin;
     syncInputs(); save(); refreshRows(); compute();
   }
   function prestigeDone() {
-    S.P = PLAN.tier; S.lv = {}; S.cur = [0, 0, 0, 0]; S.lastCheckin = null;
+    S.P = PLAN.tier; S.lv = {}; S.cur = [0, 0, 0, 0]; S.lastCheckin = null; S.curAt = Date.now();
     save(); buildInputs(); compute();
   }
 
-  /* ---------- timeline of later steps ---------- */
-  function timelineHtml(ev, n) {
-    const cards = [];
-    let prevT = ev[0].t;
+  /* ---------- Upgrade Plan: always the next upgrade set and the next check-in ---------- */
+  function buildBlocks(ev) {
+    const out = []; let prevT = ev[0].t;
     ev.slice(1).forEach(e => {
-      const when = n.T0 + e.t * 3600000;
-      if (e.type === 'prestige') {
-        cards.push('<div class="tl pres"><div class="tlh">Prestige</div><div class="tlw">About ' + clock(when) + ' (in ' + dur(e.t) + ')</div>' +
-          '<p>When the run reaches wave ' + e.wave + ', prestige for P' + e.to + '. This follows the purchases above. It resets non-gem upgrades and currency, and you start over at P' + e.to + '.</p></div>');
-        prevT = e.t; return;
-      }
-      const gap = e.t - prevT;
-      cards.push('<div class="tl chk"><div class="tlh">Check in</div><div class="tlw">' + clock(when) + ' (in ' + dur(e.t) + ')</div>' +
-        '<p>' + (gap > 0.0001 ? 'Interval: ' + dur(gap) + ' after the previous step. ' : 'Right after the prestige. ') + 'Before you buy, you should be holding about ' + curLine(e.before) + '.</p></div>');
-      const m = mergeSteps(e.buys);
-      if (m.length) {
-        cards.push('<div class="tl buyc"><div class="tlh">Buy</div>' + m.map(b => '<div class="step">' + tag(b.tier) + ' ' + b.name + ' <span class="muted">level ' + b.from + ' to ' + b.to + ', ' + fmt(b.cost) + '</span></div>').join('') +
-          '<p class="expect">After this set you should be able to clear about ' + wl(e.x) + '. Working toward wave ' + e.target + (e.tier != null ? ' for P' + e.tier : '') + '.' + hpNote(e.hp, e.target) + '</p></div>');
-      } else {
-        cards.push('<div class="tl buyc quiet"><div class="tlh">Buy</div><p>Nothing worth buying yet. Keep collecting. You should still be able to clear about ' + wl(e.x) + '.</p></div>');
-      }
-      if (e.finish != null) cards.push('<div class="tl pres"><div class="tlh">Goal</div><div class="tlw">About ' + clock(n.T0 + e.finish * 3600000) + '</div><p>Your next run reaches W' + n.goal + '.</p></div>');
+      if (e.type === 'prestige') { out.push({ type: 'prestige', e }); prevT = e.t; return; }
+      out.push({ type: 'checkin', e, gap: e.t - prevT });
+      out.push({ type: 'buy', e });
+      if (e.finish != null) out.push({ type: 'goal', e });
       prevT = e.t;
     });
-    return cards;
+    return out;
+  }
+  function blockHtml(b, live) {
+    const e = b.e, n = PLAN.n;
+    if (b.type === 'prestige') return '<div class="tl pres"><div class="tlh">Prestige</div><p>At wave ' + e.wave + ' for P' + e.to + ', after the purchases above.</p></div>';
+    if (b.type === 'goal') return '<div class="tl pres"><div class="tlh">Goal</div><p>The next run reaches W' + n.goal + '.</p></div>';
+    if (b.type === 'checkin') {
+      if (live && PLAN.ci) {
+        const ci = PLAN.ci;
+        return '<div class="tl chk"><div class="tlh">Check in</div><div class="tlw"><span class="cd" data-at="' + ci.at + '">' + fmtIn(ci.at - Date.now()) + '</span> &middot; ' + (ci.t <= 0 ? 'now' : shortClock(ci.at)) + '</div><p>' + ciNeedText(ci) + '</p></div>';
+      }
+      return '<div class="tl chk"><div class="tlh">Check in</div><div class="tlw">About ' + durShort(b.gap) + ' after the set above</div><p>Hold about ' + curLine(e.before) + '.</p></div>';
+    }
+    const m = mergeSteps(e.buys);
+    if (!m.length) return '<div class="tl buyc quiet"><div class="tlh">Upgrade set</div><p>Nothing worth buying yet. You should still clear about ' + wl(e.x) + '.</p></div>';
+    return '<div class="tl buyc"><div class="tlh">Upgrade set</div>' + m.map(s => '<div class="step">' + tag(s.tier) + ' ' + s.name + ' <span class="muted">level ' + s.from + ' to ' + s.to + ', ' + fmt(s.cost) + '</span></div>').join('') +
+      '<p class="expect">Then you should clear about ' + wl(e.x) + '.</p></div>';
+  }
+  function renderPlan() {
+    const el = $('#planPanel'); if (!el || !PLAN) return;
+    const skip = PLAN.view === 'buy' ? 0 : 1;           // the Next step panel already shows the current block
+    const show = PLAN.blocks.slice(skip, skip + 2);
+    let h = '<h2>Upgrade Plan</h2>';
+    if (!show.length) h += '<p class="note">Nothing further planned.</p>';
+    else h += '<div class="timeline">' + show.map((b, i) => blockHtml(b, skip === 0 && i === 0)).join('') + '</div>';
+    el.innerHTML = h;
   }
 
   /* ---------- render ---------- */
@@ -1323,7 +1493,7 @@ const Engine = (function () {
     if (res.attainable) {
       $('#sbLab').textContent = 'Reachable in time';
       $('#sbBig').textContent = 'W' + n.goal + ' in ' + dur(res.completionH);
-      $('#sbSub').textContent = dur(slack) + ' to spare. The event ends in ' + dur(n.remainH) + '.';
+      $('#sbSub').textContent = dur(slack) + ' to spare';
     } else {
       $('#sbLab').textContent = 'Out of reach in time';
       $('#sbBig').textContent = 'Max wave: W' + res.maxWave;
@@ -1331,63 +1501,46 @@ const Engine = (function () {
       const gemLine = R.maxed ? (R.maxed.r.attainable ? 'Maxed gems (P' + n.P + ') reach W' + n.goal + ' in ' + dur(R.maxed.r.completionH) : 'Maxed gems (P' + n.P + '): W' + R.maxed.r.maxWave) : '';
       $('#sbSub').innerHTML = (gemLine ? gemLine + '<br>' : '') + need;
     }
-    const checks = ev.filter(e => e.type === 'checkin');
-    const gaps = checks.map(e => e.gap).filter(Boolean).sort((a, b) => a - b);
-    const nextWait = first.gap || (R.policy.type === 'fixed' ? R.policy.iv : 1);
-    const gl = h => h < 1 ? Math.round(h * 60) + ' min' : (h + ' h');
-    $('#ckBig').textContent = gl(nextWait);
-    if (R.policy.type === 'auto' && gaps.length > 3) {
-      const lo = gaps[Math.floor(gaps.length * 0.1)], hi = gaps[Math.floor(gaps.length * 0.9)];
-      $('#ckSub').textContent = 'Auto, ' + (lo === hi ? gl(lo) : gl(lo) + ' to ' + gl(hi)) + ', ' + checks.length + ' visits';
-    } else $('#ckSub').textContent = (R.policy.type === 'auto' ? 'Auto' : 'Fixed') + ', ' + checks.length + ' visits';
 
-    PLAN = { steps: mergeSteps(first.buys), target: first.target, tier: first.tier, x: first.x, hp: first.hp, nextWait, n, R };
+    const nextEv = ev[1] && ev[1].type === 'checkin' ? ev[1] : null;
+    PLAN = { steps: mergeSteps(first.buys), target: first.target, tier: first.tier, x: first.x, hp: first.hp, nextWait: first.gap || 1, nextEv, blocks: buildBlocks(ev), n, R };
+
+    // one-line summary under the Check-in interval setting
+    const sets = ev.filter(e => e.type === 'checkin' && e.buys.length).length;
+    lastIvDesc = (S.goal > 1000 ? 'Planned as W1000, the furthest the model covers. ' : '') + 'Expected max wave W' + res.maxWave + ' in ' + sets + ' upgrade sets' +
+      (res.attainable ? ', done in about ' + dur(res.completionH) + '.' : '. W' + n.goal + ' is out of reach in time.');
+    const ivDesc = $('#ivDesc'); if (ivDesc) ivDesc.textContent = lastIvDesc;
 
     const html = [];
     html.push('<section class="panel" id="stepPanel"></section>');
     html.push('<section class="panel" id="planPanel"></section>');
+    let h = '';
 
-    const nVisits = r => r.events.filter(e => e.type === 'checkin').length;
-    let h = '<p class="note" style="margin-top:0">Auto changes the interval as it goes. After each visit it measures how much the purchases improved the build per hour and schedules the next visit so each one is worth about the same. It starts at 30 min after a prestige, and when it is saving for a big purchase it picks the time you can afford it. It tries four targets and keeps the one with the fewest visits that finishes within about 2% of the fastest.</p>' +
-      '<div class="scroll"><table><tr><th>Interval</th><th>' + (res.attainable ? 'Finish' : 'Max wave') + '</th><th>Visits</th></tr>';
-    if (R.policy.type === 'auto') {
-      h += '<tr class="isrec"><td>Auto (varies)</td><td>' + (res.attainable ? dur(res.completionH) : 'W' + res.maxWave) + '</td><td>' + nVisits(res) + '</td></tr>';
-    }
-    R.table.forEach(x => {
-      const cell = !x.r ? 'slower' : (x.r.attainable ? dur(x.r.completionH) : (res.attainable ? 'misses the event' : 'W' + x.r.maxWave));
-      const sel = R.policy.type === 'fixed' && R.policy.iv === x.iv;
-      h += '<tr class="' + (sel ? 'isrec' : '') + '"><td>Every ' + ivLabel(x.iv) + (sel ? ' (selected)' : '') + '</td><td>' + cell + '</td><td>' + (x.r ? nVisits(x.r) : '') + '</td></tr>';
-    });
-    h += '</table></div>';
-    lastIvHtml = h;
-    const ivBody = $('#ivBody'); if (ivBody) ivBody.innerHTML = h;
-
-    PLAN.cards = timelineHtml(ev, n);
-
+    // prestige path
     const pres = ev.filter(e => e.type === 'prestige');
-    h = '';
     const PI = R.pathInfo;
-    const pname = m => 'P' + m[1] + ' at W' + m[0];
+    h = '';
     if (PI && PI.used) {
       const o = PI.origChosen;
-      const gain = o.attainable && res.attainable ? 'finishes about ' + dur(o.completionH - res.completionH) + ' faster than' : (res.attainable ? 'reaches W' + n.goal + ' where you would otherwise fall short on' : 'reaches W' + res.maxWave + ' instead of W' + o.maxWave + ' on');
-      h += '<p><b>Suggested route: ' + PI.used.name + '.</b> It ' + gain + ' the standard route (P40 at W205, then P46 at W235). The standard route is the fallback if you would rather follow it.</p>';
-    } else if (PI) h += '<p>The standard route (P40 at W205, then P46 at W235) is the fastest of the routes tried.</p>';
+      const gain = o.attainable && res.attainable ? 'about ' + dur(o.completionH - res.completionH) + ' faster than' : (res.attainable ? 'reaches W' + n.goal + ' where you would otherwise fall short on' : 'reaches W' + res.maxWave + ' instead of W' + o.maxWave + ' on');
+      h += '<p><b>Suggested: ' + PI.used.name + '</b>, ' + gain + ' the standard route (P40 at W205, P46 at W235).</p>';
+    } else if (PI) h += '<p>The standard route (P40 at W205, P46 at W235) is the fastest of the routes tried.</p>';
     if (PI) {
-      h += '<details style="margin:6px 0 10px"><summary>Routes tried</summary><p class="note" style="margin-top:6px">Compared with 2 hour check-ins so they are like for like.</p><div class="scroll"><table><tr><th>Route</th><th>' + (PI.origFast.attainable || PI.tried.some(x => x.r.attainable) ? 'Finish' : 'Max wave') + '</th></tr>';
+      h += '<details data-k="routes"' + (isOpen('routes', false) ? ' open' : '') + ' style="margin:6px 0 10px"><summary>Routes tried</summary><div class="scroll"><table><tr><th>Route</th><th>' + (PI.origFast.attainable || PI.tried.some(x => x.r.attainable) ? 'Finish' : 'Max wave') + '</th></tr>';
       const rowT = (name, r, sel) => '<tr class="' + (sel ? 'isrec' : '') + '"><td>' + name + (sel ? ' (used)' : '') + '</td><td>' + (r.attainable ? dur(r.completionH) : 'W' + r.maxWave) + '</td></tr>';
       h += rowT('Standard', PI.origFast, !PI.used);
       PI.tried.forEach(x => { h += rowT(x.a.name, x.r, PI.used === x.a); });
-      h += '</table></div></details>';
+      h += '</table></div><p class="note">Compared with 2 hour check-ins.</p></details>';
     }
-    if (!pres.length) h += '<p>No prestige is needed before the goal wave on this path.</p>';
+    if (!pres.length) h += '<p>No prestige is needed before the goal wave.</p>';
     else {
       h += '<div class="scroll"><table><tr><th>Prestige</th><th>At wave</th><th>Around</th><th>Damage</th><th>Max HP</th><th>Atk speed</th></tr>';
       pres.forEach(p => { h += '<tr><td>P' + p.from + ' to P' + p.to + '</td><td>W' + p.wave + '</td><td>' + clock(n.T0 + p.t * 3600000) + '</td><td>' + fmt(p.stats.dmg) + '</td><td>' + fmt(p.stats.hp) + '</td><td>' + f2(p.stats.as) + '</td></tr>'; });
-      h += '</table></div><p class="note" style="margin-top:8px">Stats are the build you carry into each prestige. Each prestige tier adds 10% (plus Prestige Bonus upgrades) to the multiplier on max HP and damage, and a prestige resets every non-gem upgrade.</p>';
+      h += '</table></div>';
     }
     html.push(det('path', 'Prestige Path', h, false));
 
+    // stats and breakpoints
     const stNow = E.computeStats(n.P, n.gems, n.lv);
     const lvAfter = Object.assign({}, n.lv);
     first.buys.forEach(b => { lvAfter[b.id] = b.to; });
@@ -1396,44 +1549,34 @@ const Engine = (function () {
       ['Move speed', stNow.ms, stNext.ms, f2], ['Event speed', stNow.ev, stNext.ev, v => f2(v) + 'x'], ['Crit chance', stNow.cc, stNext.cc, v => f2(v) + '%'],
       ['Crit damage', stNow.cd, stNext.cd, v => f2(v) + 'x'], ['Block chance', stNow.blk, stNext.blk, v => f2(v) + '%'],
       ['Prestige multiplier', stNow.mult, stNext.mult, v => f2(v) + 'x'], ['Enemy attack speed cut', stNow.eas, stNext.eas, v => '-' + f2(v)], ['Enemy damage cut', stNow.edmg, stNext.edmg, v => '-' + f2(v)]];
-    h = '<div class="scroll"><table><tr><th>Stat</th><th>Now</th><th>After the plan</th></tr>' +
+    h = '<h3>Your stats</h3><div class="scroll"><table><tr><th>Stat</th><th>Now</th><th>After buying</th></tr>' +
       rowsS.map(s => '<tr><td>' + s[0] + '</td><td>' + s[3](s[1]) + '</td><td>' + s[3](s[2]) + '</td></tr>').join('') + '</table></div>';
-    html.push(det('stats', 'Your Stats', h, false));
-
-    const bw = E.MIL.map(m => m[0]).concat([200, 250]).filter((w, i, a) => a.indexOf(w) === i).sort((a, b) => a - b);
-    h = '<p class="note" style="margin-top:0">Damage needed to one-shot an enemy of that wave. Beyond it, extra attack damage adds nothing, so put currency into HP and attack speed.</p>' +
-      '<div class="scroll"><table><tr><th>Wave</th><th>Enemy HP</th><th>Your damage after the plan</th><th>Status</th></tr>';
+    const bw = E.MIL.map(m => m[0]).concat([200, 250, n.goal]).filter((w, i, a) => a.indexOf(w) === i && w <= 1000).sort((a, b) => a - b);
+    h += '<h3 style="margin-top:14px">One-hit damage needed</h3><div class="scroll"><table><tr><th>Wave</th><th>Enemy HP</th><th>Your damage</th><th>Status</th></tr>';
     bw.forEach(w => {
       const hp = E.EHP[w], ok = stNext.dmg >= hp;
       h += '<tr><td>W' + w + '</td><td>' + fmt(hp) + '</td><td>' + fmt(stNext.dmg) + '</td><td class="' + (ok ? 'ok-t' : 'bad-t') + '">' + (ok ? 'one-shot' : 'short by ' + fmt(hp - stNext.dmg)) + '</td></tr>';
     });
-    h += '</table></div>';
-    html.push(det('bp', 'Damage Breakpoints', h, false));
-
-    h = '<section class="panel"><details data-k="enemy"' + (isOpen('enemy', false) ? ' open' : '') + '><summary>Enemy reference</summary><div class="scroll"><table><tr><th>Wave</th><th>HP</th><th>Damage</th><th>Atk speed</th><th>Crit</th><th>Crit mult</th></tr>';
+    h += '</table></div><h3 style="margin-top:14px">Enemy stats</h3><div class="scroll"><table><tr><th>Wave</th><th>HP</th><th>Damage</th><th>Atk speed</th><th>Crit</th><th>Crit mult</th></tr>';
     bw.forEach(w => {
       const e = E.enemyAt(w, { edmg: 0, eas: 0, ecc: 0, ecd: 0 });
       h += '<tr><td>W' + w + '</td><td>' + fmt(e.hp) + '</td><td>' + e.dmg + '</td><td>' + f2(e.as) + '</td><td>' + f2(e.cc) + '%</td><td>' + f2(e.cm) + 'x</td></tr>';
     });
-    h += '</table></div></details></section>';
-    html.push(h);
+    h += '</table></div>';
+    html.push(det('stats', 'Stats and Breakpoints', h, false));
 
-    html.push('<section class="panel"><details data-k="how"' + (isOpen('how', false) ? ' open' : '') + '><summary>How the estimate works</summary><ul class="plain">' +
-      '<li>The event runs from 10 PM UTC (3 PM PDT) on the last day of the month before to 10 PM UTC on the last day of Feb, Apr, Jun, Aug, Oct and Dec. Time remaining is counted from your device clock.</li>' +
-      '<li>Each run starts on W1 with full HP and your current upgrades. Purchases made at a check-in apply from the next run. Upgrades and currency reset only when you prestige, not when you die.</li>' +
-      '<li>Fights: your swing timer resets to 0 at the start of every fight, so a kill takes (hits needed / your attack speed) seconds. Your crit chance is treated as real random hits when working out hits needed. The enemy swing timer does not reset between fights or waves, so it fills at the enemy attack speed across several kills, and a swing lands with the stats of whichever enemy you are fighting at that moment. On average that is enemy attack speed / your attack speed swings per hit you land. Event speed multiplies both sides, so it changes pace but not damage taken.</li>' +
-      '<li>Fights count down from 5 to 1 inside a wave (W27-5 first, W27-1 last), and the next wave starts as soon as W-1 is cleared. Clearing "wave 27-2" means you cleared W27-5 through W27-2.</li>' +
-      '<li>Pace: each fight takes (hits needed / attack speed) seconds plus about 6.28 seconds of movement and overhead divided by move speed, all divided by the event speed multiplier. Fitted to three real P4 runs: W24-5 in 3:06.15, W27-2 cleared in 3:14.64 and W27-1 cleared in 3:15.68. Predicted times are within 0.3% of all three. A fourth check, not used for fitting: a fresh P5 run with only gems (300 HP, 30 damage, move speed 1) is predicted to clear through W8-4 in 85 seconds, and you saw W8-4 mostly in about 84 seconds.</li>' +
-      '<li>Survival is an expected value. Crit rolls make real runs vary: a simulation of the swing-timer rules gives a spread of about plus or minus 0.3 waves (1 to 2 fights) around the estimate, and your three runs all fell inside it.</li>' +
-      '<li>Auto check-ins: the planner lengthens or shortens the gap between visits depending on how much each visit improves your build per hour, so early prestige phases (cheap upgrades, big gains) get frequent short visits and expensive late phases get longer ones. Fixed intervals are still available in the Event panel.</li>' +
-      '<li>Between check-ins the game keeps running and banking drops from each run. Drops use expected values, including the 2x gem and the 5x chance.</li>' +
-      '<li>Prestige multiplier = 1 + tier x (10% + Prestige Bonus upgrades), so each Prestige Bonus level raises the per-tier step by 1% (T1) or 2% (T2). This follows your first description and the spreadsheet note. To check it in game at P8: one level of +1% Prestige Bonus should raise HP and damage by about 4.4%. If it only moves them by about 0.6%, the bonus is a flat add instead.</li>' +
-      '<li>Relevance rules from your notes: plain attack upgrades are bought in counts that land exactly on a one-hit breakpoint, and stop once damage reaches 7 x target wave - 3 (capped at 704 from P10). Once damage is secured, crit and attack stop counting, and attack-plus-HP bundles are valued for their HP only. Enemy reductions are only bought while they still matter at the target wave, and anything with a negligible effect is skipped. Prestige Bonus is deprioritized once both the HP and attack caps are reached. There is no fixed priority order between stat types: purchases are ranked by how much they improve survival or run speed per currency spent.</li>' +
-      '<li>150,000 max HP is treated as a soft cap in end-game phases (target W205 or later): past it, HP upgrades are weighted down so currency goes elsewhere. It is not a requirement. A real W250 clear at P39 had 89,291 HP, and the model needs about 93,000 for that build.</li>' +
-      '<li>Within a tier, an upgrade unlocks only after at least 1 level of the upgrade above it has been bought. When a later upgrade is worth buying, its cost includes the first level of every earlier upgrade it still needs, and those appear first in the buy list.</li>' +
-      '<li>Prestige is suggested only when the build you hold can reach the prestige wave. In the later steps it appears after the purchases that would make it reachable.</li>' +
-      '<li>Spending: at each check-in the planner buys the bundle with the best gain per currency, scoring survival depth and, once the target wave is reachable, run speed. It tries three speed weightings and keeps the fastest finish.</li>' +
-      '<li>Prestige path follows your recommended waypoints: W10 (P1), W15 (P2), W20 (P3), W30 (P5), W55 (P10), W105 (P20), W205 (P40), W235 (P46), then the goal wave.</li></ul></details></section>');
+    html.push(det('how', 'How it works',
+      '<ul class="plain">' +
+      '<li><b>Event time.</b> Events run from 10 PM UTC (3 PM PDT) on the last day of the month before to 10 PM UTC on the last day of Feb, Apr, Jun, Aug, Oct and Dec. Time left comes from your device clock.</li>' +
+      '<li><b>Runs.</b> Each run starts on W1 with full HP and your current upgrades. Purchases apply from the next run. Upgrades and currency reset only when you prestige. Fights count down from 5 to 1, so "W27-2" means W27-5 through W27-2 are cleared.</li>' +
+      '<li><b>Combat.</b> Your swing timer resets every fight, and crits are real random hits. The enemy swing timer carries across fights and waves. Event speed scales both sides, so it changes pace, not damage taken. Each fight also costs about 6.28 s of movement divided by move speed, all divided by event speed.</li>' +
+      '<li><b>Accuracy.</b> Fitted to real P4 runs (W24-5 in 3:06, W27-2 in 3:14, W27-1 in 3:15) and checked against a fresh P5 gems-only run (predicted W8-4 in 85 s, seen W8-4 in about 84 s) and a real P39 W250 clear (model needs about 93k HP, the run had 89k). Real runs vary by about 1 to 2 fights.</li>' +
+      '<li><b>Income.</b> Expected values, including the 2x gem and the 5x chance.</li>' +
+      '<li><b>Prestige.</b> The multiplier is 1 + tier x (10% + Prestige Bonus upgrades), confirmed by that P39 build. The route search picks the fastest of several end-game routes and falls back to the standard one.</li>' +
+      '<li><b>Buying.</b> Each check-in buys the best gain per currency. Attack is bought in counts that land on a one-hit breakpoint and stops at 7 x target wave - 3 (capped at 704 from P10). HP is deprioritized past 150k in end-game phases, enemy reductions only while they matter, and Prestige Bonus once HP and attack are capped. A row unlocks after 1 level of the row above, and cap upgrades come before the levels they raise.</li>' +
+      '<li><b>Check-in time.</b> It is when you will hold enough for the next upgrade set, and it updates as you type your currency. Auto mode sets the gaps between the planned sets.</li>' +
+      '<li><b>Gems.</b> The recommendation is the cheapest set, from zero, that reaches your goal with at least 10% of the event spare. It ignores the levels you entered.</li>' +
+      '</ul>', false));
 
     $('#results').innerHTML = html.join('');
     renderStep();
@@ -1520,22 +1663,14 @@ const Engine = (function () {
       const { noGem, own, rec, recRes, state, mx, none } = r.value;
       const recCost = gemSetCost(own, rec), maxCost = gemSetCost(own, mx), fullRecCost = gemSetCost(none, rec);
       const goalTxt = 'W' + n.goal;
-      let note = 'Gems are optional. ';
-      if (noGem.attainable) note += 'With the time left, ' + goalTxt + ' can be reached without them (about ' + dur(noGem.completionH) + ').';
-      else {
-        note += 'With the time left, ' + goalTxt + ' cannot be reached without gems (best is W' + noGem.maxWave + ').';
-        if (state === 'short') note += ' Even maxed gems fall short (best W' + recRes.maxWave + ').';
-        else note += ' The cheapest set that gets there costs ' + fmt(fullRecCost) + ' gems.';
-        if (!S.useGems) note += ' Turn on Use gems to see the levels.';
-      }
-      let summary = '<b>Cost to reach the recommended levels:</b> ' + fmt(recCost) + ' gems<br><b>Cost to max everything available at P' + n.P + ':</b> ' + fmt(maxCost) + ' gems';
-      if (state === 'none') summary += '<br>No gems are needed: ' + goalTxt + ' is reachable without them with time to spare.';
-      else if (state === 'found') summary += '<br>The cheapest set from scratch that reaches ' + goalTxt + ' in about ' + dur(recCostTime(recRes)) + ', leaving at least 10% of the event spare. It is worked out with a fixed route and Auto check-ins from where you are now, so it does not depend on the levels you entered' + (recCost === 0 ? ', and you already own at least this much.' : '.');
-      else summary += '<br>Even maxed gems fall short of ' + goalTxt + ' (best W' + recRes.maxWave + '), so the recommendation is the maximum.';
+      let note = noGem.attainable
+        ? 'Optional. ' + goalTxt + ' is reachable without gems (about ' + dur(noGem.completionH) + ').'
+        : 'Without gems ' + goalTxt + ' is out of reach (best W' + noGem.maxWave + ').' + (state === 'short' ? ' Even maxed gems fall short (best W' + recRes.maxWave + ').' : ' Cheapest fix: ' + fmt(fullRecCost) + ' gems.');
+      if (!S.useGems && !noGem.attainable) note += ' Turn on Use gems for the levels.';
+      const summary = 'Recommended costs ' + fmt(recCost) + ' more gems. Maxing everything costs ' + fmt(maxCost) + '.' + (state !== 'none' && recCost === 0 ? ' You already own this much.' : '');
       lastGemInfo = { note, rec, summary };
       if (my === token) applyGemInfo(lastGemInfo);
     }
-    function recCostTime(r) { return r.completionH; }
     step();
   }
 
