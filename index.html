@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Event Upgrade Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root {
+  --bg: #e9edf1; --surface: #ffffff; --surface2: #f3f5f8; --ink: #17202b; --muted: #596575; --line: #d3dae1;
+  --accent: #0f5f73; --accent-ink: #ffffff; --good: #2b7a52; --warn: #a96a14; --bad: #b0402f;
+  --t1: #3f7d5a; --t2: #2f6db5; --t3: #7a4fb0; --t4: #b8641e; --tag-ink: #ffffff;
+  --good-bg: #e3f1e9; --warn-bg: #f8ecd8; --bad-bg: #f6e0db;
+  --tap: 44px; --radius: 12px; color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161d; --surface: #1a212b; --surface2: #212a37; --ink: #e5eaf0; --muted: #98a4b3; --line: #2c3745;
+    --accent: #5db7d1; --accent-ink: #0b1a20; --good: #62c08e; --warn: #e0a24f; --bad: #e57f6b;
+    --t1: #6fc596; --t2: #6ea8ea; --t3: #b592e6; --t4: #eb9a55; --tag-ink: #0b1117;
+    --good-bg: #1b3328; --warn-bg: #3a2d17; --bad-bg: #3b2320; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161d; --surface: #1a212b; --surface2: #212a37; --ink: #e5eaf0; --muted: #98a4b3; --line: #2c3745;
+  --accent: #5db7d1; --accent-ink: #0b1a20; --good: #62c08e; --warn: #e0a24f; --bad: #e57f6b;
+  --t1: #6fc596; --t2: #6ea8ea; --t3: #b592e6; --t4: #eb9a55; --tag-ink: #0b1117;
+  --good-bg: #1b3328; --warn-bg: #3a2d17; --bad-bg: #3b2320; color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink);
+  font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 15px; line-height: 1.5;
+  font-variant-numeric: tabular-nums; -webkit-tap-highlight-color: transparent; }
+h1, h2, h3 { font-family: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 28px; line-height: 1.1; }
+h2 { font-size: 19px; margin-bottom: 10px; }
+h3 { font-size: 15px; margin-bottom: 6px; }
+p { margin: 0 0 8px; }
+.note { font-size: 13px; color: var(--muted); }
+.muted { color: var(--muted); }
+.ok-t { color: var(--good); font-weight: 600; } .bad-t { color: var(--bad); font-weight: 600; } .warn-t { color: var(--warn); font-weight: 600; }
+ul.plain { margin: 6px 0 0; padding-left: 18px; }
+ul.plain li { margin-bottom: 4px; }
+
+/* ---------- layout ---------- */
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 16px 60px; }
+.top-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.top-head .sub { color: var(--muted); max-width: 64ch; margin: 6px 0 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.tabs { display: none; }
+
+/* status bar: fixed size so the page never jumps while values change */
+.statusbar { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; height: 116px; margin-bottom: 16px; }
+.sb { border: 2px solid var(--line); border-radius: var(--radius); padding: 12px 16px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-width: 0; position: relative; }
+.sb.ok { background: var(--good-bg); border-color: var(--good); }
+.sb.bad { background: var(--bad-bg); border-color: var(--bad); }
+.sb .lab { font-size: 12.5px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb .bigline { font-family: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; font-weight: 700; font-size: clamp(19px, 3.1vw, 30px); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb .subline { font-size: 13.5px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.statusbar.busy .bigline, .statusbar.busy .subline { opacity: .55; }
+.statusbar .busytag { position: absolute; top: 8px; right: 12px; font-size: 12px; color: var(--muted); visibility: hidden; }
+.statusbar.busy .busytag { visibility: visible; }
+
+
+.timebar { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 68px; padding: 8px 16px; margin-bottom: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.timebar .lab { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.timebar .bigline { font-family: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1; white-space: nowrap; }
+.timebar .tb-sub { font-size: 13px; color: var(--muted); text-align: right; line-height: 1.3; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- panels ---------- */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+.panel > details > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; min-height: 32px;
+  font-family: 'Bricolage Grotesque', 'Segoe UI', sans-serif; font-weight: 600; font-size: 17px; }
+.panel > details > summary::-webkit-details-marker { display: none; }
+.panel > details > summary::before { content: ""; flex: none; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; margin-left: 3px; }
+.panel > details[open] > summary::before { transform: rotate(45deg); }
+.panel > details[open] > summary { margin-bottom: 10px; }
+.panel > details > summary .sumcount { margin-left: auto; font-family: 'Instrument Sans', sans-serif; font-weight: 500; font-size: 12.5px; color: var(--muted); }
+#stepPanel { border-left: 4px solid var(--accent); }
+
+/* ---------- form controls ---------- */
+.field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
+.field label { flex: 1; min-width: 0; }
+.field small { display: block; color: var(--muted); font-size: 12px; line-height: 1.3; }
+input.int, select { font: inherit; min-height: 38px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface2); color: var(--ink); }
+input.int { width: 96px; text-align: right; }
+input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+input:disabled { opacity: .45; }
+input:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; cursor: pointer; border-radius: 9px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); padding: 8px 14px; min-height: 38px; touch-action: manipulation; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+button:disabled { cursor: not-allowed; }
+.row2 { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+label.chk { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; }
+.timefield { display: flex; gap: 6px; align-items: center; }
+.timefield input { width: 64px; }
+.timefield span { color: var(--muted); font-size: 13px; }
+.evinfo { min-height: 44px; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.evinfo .remain { color: var(--ink); font-weight: 600; font-size: 16px; margin-top: 2px; }
+#gemNote { min-height: 2.6em; }
+.pinfo, .limits { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; line-height: 1.4; }
+
+/* ---------- tags, pills ---------- */
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; color: var(--tag-ink); background: var(--tc); white-space: nowrap; }
+.t1 { --tc: var(--t1); } .t2 { --tc: var(--t2); } .t3 { --tc: var(--t3); } .t4 { --tc: var(--t4); }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 1px 9px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill svg { width: 11px; height: 11px; flex: none; }
+.pill.ok { color: var(--good); border-color: var(--good); background: transparent; }
+
+/* ---------- upgrade and gem rows ---------- */
+.tierhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 14px 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--tc); }
+.tierhead b { font-family: 'Bricolage Grotesque', sans-serif; color: var(--tc); font-size: 16px; }
+.tierhead .tc { font-size: 12px; color: var(--muted); }
+.colhead { display: grid; grid-template-columns: minmax(0, 1fr) 84px 44px 76px; gap: 6px; font-size: 12px; color: var(--muted); padding-left: 10px; }
+.colhead span:not(:first-child) { text-align: right; }
+.colhead.g { grid-template-columns: minmax(0, 1fr) 48px 84px 44px; }
+.urow, .grow { display: grid; gap: 6px; align-items: center; padding: 5px 0 5px 10px; margin-bottom: 3px; border-left: 3px solid var(--tc, var(--accent)); }
+.urow { grid-template-columns: minmax(0, 1fr) 84px 44px 76px; }
+.grow { grid-template-columns: minmax(0, 1fr) 48px 84px 44px; }
+.urow .nm, .grow .nm { font-size: 13.5px; line-height: 1.3; }
+.urow .nm i, .grow .nm i { font-style: normal; color: var(--muted); font-size: 12px; }
+.urow input.int, .grow input.int { width: 84px; min-height: 34px; padding: 4px 8px; }
+.urow .mx, .urow .cs, .grow .mx { font-size: 12.5px; color: var(--muted); text-align: right; min-width: 0; }
+.urow .cs .pill { white-space: normal; max-width: 100%; justify-content: center; text-align: center; line-height: 1.25; border-radius: 10px; padding: 2px 8px; }
+.grow .rc { font-size: 13px; font-weight: 600; text-align: right; color: var(--accent); }
+.grow .rc.need { color: var(--warn); }
+.grow input[type=checkbox] { justify-self: end; }
+.urow.locked { opacity: .62; }
+.urow.locked .nm { color: var(--muted); }
+
+/* ---------- next step / buy list ---------- */
+.buy { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.buy:last-of-type { border-bottom: 0; }
+.buy .lv { color: var(--muted); font-size: 13px; }
+.buy .cost { font-weight: 600; text-align: right; }
+.buy.done .nm { text-decoration: line-through; opacity: .55; }
+.buy.done { opacity: .6; }
+.donebtn { min-width: 72px; font-weight: 600; }
+.donebtn:disabled { opacity: .4; }
+.waitbig { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; margin-bottom: 2px; }
+.nxrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin: 10px 0; }
+.nxrow .nf { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.nxrow .nf input { width: 96px; }
+.nxrow .nf b { color: var(--tc); }
+
+/* ---------- tables, timeline ---------- */
+.scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 500; font-size: 12.5px; }
+tr.isrec td { font-weight: 600; background: var(--surface2); }
+.step { padding: 3px 0; font-size: 13.5px; }
+.timeline { display: flex; flex-direction: column; gap: 8px; }
+.tl { border: 1px solid var(--line); border-left-width: 4px; border-radius: 10px; padding: 10px 12px; background: var(--surface2); }
+.tl p { margin: 4px 0 0; font-size: 13.5px; }
+.tl .tlh { font-family: 'Bricolage Grotesque', 'Segoe UI', sans-serif; font-weight: 700; font-size: 15px; }
+.tl .tlw { font-weight: 600; font-size: 13.5px; }
+.tl.chk { border-left-color: var(--muted); }
+.tl.buyc { border-left-color: var(--accent); background: var(--surface); }
+.tl.buyc.quiet { opacity: .75; }
+.tl.pres { border-left-color: var(--warn); }
+.tl .expect { color: var(--ink); font-weight: 500; }
+
+
+.stepno { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-family: 'Instrument Sans', sans-serif; font-size: 12.5px; font-weight: 700; vertical-align: 2px; }
+.panel > details > summary .stepno { margin-right: 0; }
+.curgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.cur { display: flex; align-items: center; gap: 10px; }
+.cur input.int { flex: 1; width: 100%; min-width: 0; }
+.cdline { font-size: 14px; margin: 2px 0 6px; }
+.cdline .cd { font-variant-numeric: tabular-nums; }
+.nxlabel { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.nxrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin: 6px 0 10px; }
+.nxrow label.nf { flex-direction: row; align-items: center; gap: 8px; }
+.nxrow label.nf b { color: var(--tc); min-width: 20px; }
+.nxrow label.nf input { flex: 1; min-width: 0; width: 100%; }
+
+
+/* ---------- header buttons, setup-code dialog, number tip, update bar ---------- */
+.hbtns { display: flex; gap: 8px; align-items: center; }
+.hbtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 38px; padding: 6px 12px; }
+.hbtn svg { width: 18px; height: 18px; flex: none; }
+dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); padding: 18px; width: min(92vw, 460px); }
+dialog::backdrop { background: rgba(0, 0, 0, .5); }
+dialog h2 { margin-bottom: 4px; }
+dialog h3 { margin: 16px 0 4px; }
+dialog textarea { width: 100%; font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 14px; line-height: 1.4; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface2); color: var(--ink); resize: none; word-break: break-all; }
+dialog .row2 { margin-top: 8px; }
+#numTip { position: absolute; z-index: 60; background: var(--ink); color: var(--bg); padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity .15s; }
+#numTip.show { opacity: 1; }
+.updatebar { display: none; }
+.updatebar.show { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; justify-content: center; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--line); }
+.updatebar button { width: 100%; max-width: 420px; }
+.hlabel { display: inline; }
+
+/* ---------- tablet and phone ---------- */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .wrap { padding: 12px 12px 88px; }
+  .statusbar { grid-template-columns: minmax(0, 1fr); height: auto; gap: 8px; margin-bottom: 10px; }
+  #sbMain { height: 122px; }
+  #sbCheck { height: 64px; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "big lab" "big sub"; column-gap: 14px; align-content: center; }
+  #sbCheck .lab { grid-area: lab; align-self: end; } #sbCheck .bigline { grid-area: big; align-self: center; font-size: 24px; } #sbCheck .subline { grid-area: sub; align-self: start; -webkit-line-clamp: 1; }
+  .sb { padding: 10px 14px; }
+  .timebar { height: 62px; padding: 8px 14px; } .timebar .bigline { font-size: 22px; } .timebar .tb-sub { font-size: 12px; max-width: 46%; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; }
+  .tabs button { min-height: var(--tap); border: 0; background: transparent; border-radius: 10px; font-weight: 600; color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+  .grid[data-tab="plan"] #inputs { display: none; }
+  .grid[data-tab="setup"] #results { display: none; }
+  .hlabel { display: none; }
+  .hbtn { min-width: var(--tap); padding: 6px 10px; }
+  h1 { font-size: 24px; }
+  .top-head .sub { display: none; }
+  .top-head { align-items: center; flex-wrap: nowrap; }
+}
+@media (max-width: 700px) {
+  .panel { padding: 12px; }
+  .colhead { display: none; }
+  /* two-line rows: name on top, then level / max / next */
+  .urow { grid-template-columns: auto auto minmax(0, 1fr); grid-template-areas: "nm nm nm" "in mx cs"; row-gap: 6px; column-gap: 12px; padding: 8px 0 8px 10px; margin-bottom: 6px; }
+  .urow .nm { grid-area: nm; font-size: 14.5px; }
+  .urow input.int { grid-area: in; width: 92px; }
+  .urow .mx { grid-area: mx; text-align: left; } .urow .mx::before { content: "max "; }
+  .urow .cs { grid-area: cs; text-align: right; } .urow .cs[data-k="cost"]::before { content: "next "; }
+  .urow.locked .mx { display: none; }
+  .grow { grid-template-columns: auto auto minmax(0, 1fr); grid-template-areas: "nm nm nm" "in rc mx"; row-gap: 6px; column-gap: 12px; padding: 8px 0 8px 10px; margin-bottom: 6px; }
+  .grow .nm { grid-area: nm; font-size: 14.5px; }
+  .grow input { grid-area: in; }
+  .grow input.int { width: 92px; }
+  .grow input[type=checkbox] { justify-self: start; }
+  .grow .rc { grid-area: rc; text-align: left; } .grow .rc::before { content: "rec "; font-weight: 400; color: var(--muted); }
+  .grow .mx { grid-area: mx; text-align: right; } .grow .mx::before { content: "max "; }
+  .field { gap: 10px; }
+  .nxrow .nf { flex: 1 1 calc(50% - 10px); }
+  .urow.locked { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "nm cs"; row-gap: 0; }
+  .urow.locked input { display: none; }
+  .buy { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "tag nm done" "tag cost done"; column-gap: 10px; row-gap: 2px; padding: 12px 0; }
+  .buy > .tag { grid-area: tag; align-self: start; margin-top: 3px; } .buy > .nm { grid-area: nm; }
+  .buy > .cost { grid-area: cost; text-align: left; font-size: 13px; font-weight: 500; color: var(--muted); } .buy > .cost::before { content: "cost "; }
+  .buy > .donebtn { grid-area: done; align-self: center; min-width: 84px; }
+}
+/* touch devices: 16px text stops iOS zooming into fields, and every control is at least 44px tall */
+@media (pointer: coarse), (max-width: 700px) {
+  input.int, select, button, textarea { min-height: var(--tap); font-size: 16px; }
+  .urow input.int, .grow input.int { min-height: var(--tap); }
+  input[type=checkbox] { width: 26px; height: 26px; }
+  .panel > details > summary { min-height: var(--tap); }
+  label.chk { min-height: var(--tap); }
+  table { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top-head">
+    <div>
+      <h1>Event upgrade planner</h1>
+      <p class="sub">Enter your prestige, currency and upgrades. The planner works out what to buy and when to buy it.</p>
+    </div>
+    <div class="hbtns">
+      <button id="btnTheme" class="hbtn" type="button" aria-label="Switch theme"></button>
+      <button id="btnCode" class="hbtn" type="button" aria-label="Import/Export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg><span class="hlabel">Import/Export</span></button>
+      <button id="btnReset" class="hbtn" type="button" aria-label="Reset all inputs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="hlabel">Reset</span></button>
+    </div>
+  </header>
+
+  <section class="timebar" id="timebar">
+    <div class="tb-main"><div class="lab" id="tbLab">Event time left</div><div class="bigline" id="tbBig">...</div></div>
+    <div class="tb-sub" id="tbSub"></div>
+  </section>
+
+  <section class="statusbar" id="top" aria-live="polite">
+    <div class="sb" id="sbMain"><span class="busytag">Updating</span><div class="lab" id="sbLab">Goal projection</div><div class="bigline" id="sbBig">Calculating</div><div class="subline" id="sbSub">Starting</div></div>
+    <div class="sb" id="sbCheck"><div class="lab">Next upgrade set</div><div class="bigline" id="ckBig">...</div><div class="subline" id="ckSub"></div></div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Planner view">
+    <button type="button" role="tab" id="tabPlan" data-tab="plan" aria-selected="true">Plan</button>
+    <button type="button" role="tab" id="tabSetup" data-tab="setup" aria-selected="false">Setup</button>
+  </nav>
+
+  <div class="grid" id="grid" data-tab="plan">
+    <aside id="inputs" aria-label="Setup"></aside>
+    <main id="results" aria-live="polite"></main>
+  </div>
+  <div class="updatebar" id="updateBar"><button class="primary" type="button" id="btnUpdate">Update plan</button></div>
+</div>
+<dialog id="codeDlg" aria-labelledby="cdTitle">
+  <h2 id="cdTitle">Import/Export</h2>
+  <p class="note">Copy this code to bring your setup to another device.</p>
+  <textarea id="cdOut" readonly rows="2" aria-label="Your setup code"></textarea>
+  <div class="row2"><button class="primary" type="button" id="cdCopy">Copy code</button><span class="note" id="cdCopied" role="status"></span></div>
+  <h3>Import a code</h3>
+  <textarea id="cdIn" rows="2" placeholder="Paste a code here" aria-label="Setup code to import" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+  <div class="row2"><button type="button" id="cdImport">Import</button><span class="note" id="cdMsg" role="status"></span></div>
+  <div class="row2" style="justify-content:flex-end;margin-top:14px"><button type="button" id="cdClose">Close</button></div>
+</dialog>
+<script>
+const Engine = (function () {
+  'use strict';
+
+  /* ---------- Enemy tables (index = wave, 1-based) ---------- */
+  const WMAX = 1005;   // enemy data runs well past W250 so a higher goal wave can be planned
+  const EHP = [], EDMG = [], EAS = [], ECC = [], ECM = [];
+  for (let w = 1; w <= WMAX; w++) {
+    const i = w - 1;
+    EHP[w] = 11 + 7 * i;
+    EDMG[w] = 3 + 0.6 * i;
+    EAS[w] = 0.82 + 0.02 * i;
+    ECC[w] = 1 + i;
+    ECM[w] = 1.05 + 0.05 * i;
+  }
+
+  /* ---------- Upgrade table ---------- */
+  const UPG = [];
+  function U(tier, name, max, unlock, cost, fx, kind) {
+    const idx = UPG.filter(u => u.tier === tier).length;
+    UPG.push({ id: 't' + tier + '_' + idx, tier, name, max, unlock, cost, fx: fx || {}, kind: kind || null });
+  }
+  U(1, '+1 Attack Damage', 50, 0, 5, { atk: 1 });
+  U(1, '+2 Max HP', 50, 0, 6, { hp: 2 });
+  U(1, '+0.02 Attack Speed', 25, 0, 8, { as: 0.02 });
+  U(1, '+0.03 Move Speed', 25, 0, 10, { ms: 0.03 });
+  U(1, '+3% Event Speed', 25, 1, 12, { ev: 0.03 });
+  U(1, '+1% Crit Chance, +0.10 Crit Damage', 25, 2, 20, { cc: 1, cd: 0.1 });
+  U(1, '+1 Attack Damage, +2 Max HP', 25, 2, 75, { atk: 1, hp: 2 });
+  U(1, '+1 Tier 1 Upgrade Caps', 10, 4, 2500, null, 'cap');
+  U(1, '+1% Prestige Bonus', 5, 8, 25000, { pb: 0.01 });
+  U(1, '+3 Attack Damage, +3 Max HP', 40, 10, 5000, { atk: 3, hp: 3 });
+  U(2, '+3 Max HP', 25, 0, 5, { hp: 3 });
+  U(2, '-0.02 Enemy Attack Speed', 15, 0, 8, { eas: 0.02 });
+  U(2, '-1 Enemy Attack Damage', 10, 0, 12, { edmg: 1 });
+  U(2, '-1% Enemy Crit Chance, -0.10 Enemy Crit Damage', 15, 1, 20, { ecc: 1, ecd: 0.1 });
+  U(2, '+1 Attack Damage, +0.01 Attack Speed', 25, 3, 40, { atk: 1, as: 0.01 });
+  U(2, '+1 Tier 2 Upgrade Caps', 10, 5, 500, null, 'cap');
+  U(2, '+2% Prestige Bonus', 15, 10, 650, { pb: 0.02 });
+  U(3, '+2 Attack Damage', 20, 1, 5, { atk: 2 });
+  U(3, '+0.02 Attack Speed', 20, 1, 8, { as: 0.02 });
+  U(3, '+1% Crit Chance', 20, 2, 12, { cc: 1 });
+  U(3, '+5% Event Speed', 20, 3, 18, { ev: 0.05 });
+  U(3, '+3 Attack Damage, +3 Max HP', 10, 4, 30, { atk: 3, hp: 3 });
+  U(3, '+1 Tier 3 Upgrade Caps', 10, 6, 250, null, 'cap');
+  U(3, '+3% 5x Currency Drop Chance', 10, 8, 300, { x5: 0.03 });
+  U(3, '+5 Max HP, +0.03 Attack Speed', 40, 10, 125, { hp: 5, as: 0.03 });
+  U(4, '+1% Block Chance', 15, 1, 10, { blk: 1 });
+  U(4, '+5 Max HP', 15, 1, 12, { hp: 5 });
+  U(4, '+0.10 Crit Damage, -0.10 Enemy Crit Damage', 15, 4, 15, { cd: 0.1, ecd: 0.1 });
+  U(4, '+0.02 Attack Speed, +0.02 Move Speed', 15, 5, 20, { as: 0.02, ms: 0.02 });
+  U(4, '+4 Max HP, +4 Attack Damage', 15, 6, 40, { hp: 4, atk: 4 });
+  U(4, '+1 Tier 4 Upgrade Caps', 10, 6, 250, null, 'cap');
+  U(4, '+1 Cap of Cap Upgrades', 10, 7, 500, null, 'capcap');
+  U(4, '+10 Max HP, +0.05 Attack Speed', 40, 10, 150, { hp: 10, as: 0.05 });
+
+  // Keys that change survival or run pace (event speed, move speed, 5x drop chance count as pace)
+  const VALUE_KEYS = ['atk', 'hp', 'as', 'cc', 'cd', 'blk', 'eas', 'edmg', 'ecc', 'ecd', 'pb', 'ms', 'ev', 'x5'];
+  const FX_KEYS = ['atk', 'hp', 'as', 'ms', 'ev', 'cc', 'cd', 'blk', 'eas', 'edmg', 'ecc', 'ecd', 'pb', 'x5'];
+  const BY_ID = {}, BY_TIER = [null, [], [], [], []], CAP_ID = {};
+  UPG.forEach(u => {
+    BY_ID[u.id] = u;
+    BY_TIER[u.tier].push(u);
+    if (u.kind === 'cap') CAP_ID[u.tier] = u.id;
+    u.rel = u.kind === 'cap' ? true : VALUE_KEYS.some(k => u.fx[k]);
+    u.fxList = Object.keys(u.fx).map(k => [k, u.fx[k]]);
+    const kk = Object.keys(u.fx).join(',');
+    u.cat = u.kind ? 'cap' : ({ pb: 'pb', ev: 'ev', ms: 'ms', as: 'as', atk: 'atk', hp: 'hp', 'cc': 'crit', 'cc,cd': 'crit', 'cd,ecd': 'ecrit', eas: 'enemy', edmg: 'enemy', 'ecc,ecd': 'enemy', blk: 'blk', x5: 'x5' }[kk] || 'bundle');
+  });
+  const CAPCAP_ID = UPG.find(u => u.kind === 'capcap').id;
+  // Within a tier an upgrade only unlocks once the one above it in the list has at least 1 level.
+  for (let t = 1; t <= 4; t++) BY_TIER[t].forEach((u, i) => { u.idx = i; u.prev = i > 0 ? BY_TIER[t][i - 1] : null; });
+
+  /* ---------- Costs: round(base * 1.25^(L-1)) ---------- */
+  const COST = {};
+  UPG.forEach(u => {
+    const arr = [0], pref = [0];
+    for (let l = 1; l <= 110; l++) {
+      const c = Math.round(u.cost * Math.pow(1.25, l - 1));
+      arr[l] = c; pref[l] = pref[l - 1] + c;
+    }
+    COST[u.id] = { arr, pref };
+  });
+  function nextCost(u, L) { return COST[u.id].arr[L + 1]; }
+  function maxLevel(u, lv) {
+    if (u.kind === 'cap') return 10 + (lv[CAPCAP_ID] || 0);
+    if (u.kind === 'capcap') return 10;
+    return u.max + (lv[CAP_ID[u.tier]] || 0);
+  }
+
+  /* ---------- Gems ---------- */
+  function gemCost(n) { return 50 + 25 * (n - 1); }
+  function gemMax(P) { return { atk: 5 + P, hp: 5 + P, speed: Math.min(3, 1 + Math.floor(P / 5)), x2: 1 }; }
+  const GEM_SETS = { hp: 3, speed: 1, x2: 1, cost: 225 + 500 + 500 };
+
+  /* ---------- Player stats ---------- */
+  function computeStats(P, gems, lv) {
+    const f = {};
+    for (let k = 0; k < FX_KEYS.length; k++) f[FX_KEYS[k]] = 0;
+    for (let i = 0; i < UPG.length; i++) {
+      const u = UPG[i], L = lv[u.id];
+      if (!L || u.kind) continue;
+      const fl = u.fxList;
+      for (let j = 0; j < fl.length; j++) f[fl[j][0]] += fl[j][1] * L;
+    }
+    const mult = 1 + P * (0.1 + f.pb); // Prestige Bonus upgrades raise the per-tier step (10% base)
+    const rawAtk = 10 + f.atk, rawHp = 100 + f.hp;
+    return {
+      dmg: Math.round(rawAtk * (1 + 0.1 * gems.atk) * mult),
+      hp: Math.round(rawHp * (1 + 0.1 * gems.hp) * mult),
+      as: 1 + f.as, ms: 1 + f.ms,
+      ev: 1 + 1.25 * gems.speed + f.ev,
+      cc: Math.min(100, f.cc), cd: 2 + f.cd, blk: Math.min(100, f.blk),
+      eas: f.eas, edmg: f.edmg, ecc: f.ecc, ecd: f.ecd,
+      x5: Math.min(1, f.x5), mult, rawAtk, rawHp
+    };
+  }
+
+  /* ---------- Combat + pace model ---------- */
+  let WALK = 6.28;
+  function setWalk(v) { WALK = v; } // movement/overhead seconds per fight at move speed 1 and event speed 1x (fitted to a real run)
+  function enemyAt(w, st) {
+    const dmg = Math.max(1, Math.round(EDMG[w]) - st.edmg);
+    const as = Math.max(0.01, EAS[w] - st.eas);
+    const cc = Math.min(100, Math.max(0, ECC[w] - st.ecc));
+    const cm = Math.max(1, ECM[w] - st.ecd);
+    return { hp: EHP[w], dmg, as, cc, cm };
+  }
+  function playerAvgHit(st) {
+    const c = st.cc / 100;
+    return st.dmg * (1 - c) + c * Math.round(st.dmg * st.cd);
+  }
+  // P(Binomial(n, c) >= j), cached per whole-percent crit chance
+  const TAIL = {};
+  const NMAX = 60;
+  function tailTable(cPct) {
+    if (TAIL[cPct]) return TAIL[cPct];
+    const c = cPct / 100, tab = [];
+    for (let n = 0; n <= NMAX; n++) {
+      const pmf = [];
+      let coef = 1;
+      for (let k = 0; k <= n; k++) {
+        if (k > 0) coef = coef * (n - k + 1) / k;
+        pmf.push(coef * Math.pow(c, k) * Math.pow(1 - c, n - k));
+      }
+      const ge = new Array(n + 2).fill(0);
+      for (let j = n; j >= 0; j--) ge[j] = ge[j + 1] + pmf[j];
+      tab.push(ge);
+    }
+    TAIL[cPct] = tab;
+    return tab;
+  }
+  // Tunables (fitted to a real run, see calibration notes)
+  let SCALE = 1, MODE = 'C';
+  const RF = { hpSkip: false, atkCounts: true, weights: true, minGain: true, freeze: true }; // hpSkip (a priority rule) is off; the rest are relevance/soft-cap rules
+  function setRules(o) { Object.assign(RF, o); }
+  function setModel(mode, scale) { MODE = mode; SCALE = scale; }
+  // Expected hits to kill and expected enemy swings, with crits as real random hits
+  function fightStats(st, w, D, Dc, cPct) {
+    const HP = EHP[w];
+    const r = Math.max(0.01, EAS[w] - st.eas) / st.as;
+    const sw = MODE === 'A' ? (h => Math.max(0, Math.ceil(h * r - 1e-9) - 1)) : (h => h * r);
+    if (D >= HP) return { eh: 1, es: sw(1) };
+    const hmax = Math.ceil(HP / D - 1e-9);
+    if (hmax > NMAX) { const h = HP / (D * (1 - cPct / 100) + Dc * cPct / 100) + 0.5; return { eh: h, es: sw(Math.ceil(h)) }; }
+    const nmin = Dc > D ? Math.max(1, Math.ceil(HP / Dc - 1e-9)) : hmax;
+    const tab = tailTable(cPct);
+    let prev = 0, eh = 0, es = 0;
+    for (let n = nmin; n <= hmax; n++) {
+      let cdf = 1;
+      if (n < hmax) {
+        const jmin = Math.ceil((HP - n * D) / (Dc - D) - 1e-9);
+        cdf = jmin <= 0 ? 1 : (jmin > n ? 0 : tab[n][jmin]);
+      }
+      const p = cdf - prev; prev = cdf;
+      eh += p * n; es += p * sw(n);
+    }
+    return { eh, es };
+  }
+  function waveCore(st, w, ctx) {
+    const f = fightStats(st, w, st.dmg, ctx.Dc, ctx.cPct);
+    const dmg = Math.max(1, Math.round(EDMG[w]) - st.edmg);
+    const cc = Math.min(1, Math.max(0, (ECC[w] - st.ecc) / 100));
+    const cm = Math.max(1, ECM[w] - st.ecd);
+    const avgE = ((1 - cc) * dmg + cc * Math.round(dmg * cm)) * (1 - st.blk / 100);
+    return { hits: f.eh, wave: 5 * f.es * avgE * SCALE };
+  }
+
+  let HP_REQ = 150000;         // soft cap: HP upgrades are deprioritized past this in end-game phases (not a requirement)
+  function setHpReq(v) { HP_REQ = v; }       // minimum max HP to reach W250 (end-game soft cap for HP purchases)
+  // Run from W1 with full HP. Capable = can stand on `target`. Time in hours.
+  function evalBuild(st, target, lambda) {
+    const ctx = { Dc: Math.round(st.dmg * st.cd), cPct: Math.round(st.cc) };
+    const last = target - 1;
+    let hp = st.hp, tsec = 0, pace = 0, died = false, x = 0, dieWave = 0, tDeath = 0;
+    const avgP = playerAvgHit(st);
+    for (let w = 1; w <= last; w++) {
+      if (died) { // only the pace term still needs hits; a cheap estimate is enough
+        if (w > 260) break;
+        pace += 5 * (Math.max(1, Math.ceil(EHP[w] / avgP)) / st.as + WALK / st.ms) / st.ev;
+        continue;
+      }
+      const c = waveCore(st, w, ctx);
+      const tw = 5 * (c.hits / st.as + WALK / st.ms) / st.ev;
+      pace += tw;
+      if (!died) {
+        if (hp <= c.wave) {
+          died = true; x = (w - 1) + hp / c.wave; dieWave = w; tDeath = tsec + tw * (hp / c.wave);
+          if (!lambda) break;
+        } else { hp -= c.wave; tsec += tw; }
+      }
+    }
+    const capable = !died;
+    const r = { capable, wave: capable ? target : dieWave, cleared: capable ? last : dieWave - 1,
+      tTarget: tsec / 3600, runH: Math.max(1e-5, (capable ? tsec : tDeath) / 3600), hpLeft: capable ? hp / st.hp : 0 };
+    r.x = capable ? target : x;
+    r.J = r.x;
+    if (lambda) r.J -= lambda * (Math.log(Math.max(pace, 1e-6)) - Math.log(1 + 4 * st.x5));
+    return r;
+  }
+  function incomePerRun(cleared, gems, st) {
+    const m = (gems.x2 ? 2 : 1) * (1 + 4 * st.x5);
+    const c = Math.max(0, cleared);
+    const n5 = Math.floor(c / 5), n10 = Math.floor(c / 10), n15 = Math.floor(c / 15);
+    return [c * (c + 1) / 2 * m, n5 * (n5 + 1) / 2 * m, n10 * (n10 + 1) / 2 * m, n15 * (n15 + 1) / 2 * m];
+  }
+
+  /* ---------- Prestige path ---------- */
+  const MIL = [[10, 1], [15, 2], [20, 3], [30, 5], [55, 10], [105, 20], [205, 40], [235, 46]];
+  function tierAtWave(w) { return Math.max(0, Math.floor(w / 5) - 1); }
+  function pathFor(P, goal) { return MIL.filter(m => m[1] > P && m[0] < goal); }
+
+  /* ---------- Greedy spender ---------- */
+  const SIZES = [1, 3, 8, 20, 48];
+  function spendAll(ctx) {
+    const P = ctx.P, gems = ctx.gems, lv = ctx.lv, cur = ctx.cur, target = ctx.target, lambda = ctx.lambda;
+    const waiting = ctx.waiting;
+    const RULES = ctx.rules !== false;
+    const ablate = ctx.ablate || null, catW = ctx.catW || null;
+    let st = computeStats(P, gems, lv);
+    const out = [];
+    // one-hit damage needed to clear every wave before the target: 7 x wave - 3 (capped at 704 from P10 on)
+    const dReq = Math.min(7 * target - 3, P >= 10 ? 704 : Infinity);
+    let frozen = false;
+    function trial(mods) {
+      for (const m of mods) lv[m[0]] += m[1];
+      const s2 = computeStats(P, gems, lv);
+      for (const m of mods) lv[m[0]] -= m[1];
+      if (frozen) { s2.dmg = st.dmg; s2.cc = st.cc; s2.cd = st.cd; } // damage and crit stop counting once one-hits are secured
+      return evalBuild(s2, target, lambda).J;
+    }
+    const keysOf = (u) => Object.keys(u.fx).join(',');
+    const isPureAtk = (u) => keysOf(u) === 'atk';
+    const isPureHp = (u) => keysOf(u) === 'hp';
+    const edmgU = BY_TIER[2].find(u => u.fx.edmg);
+    const usefulEdmg = Math.max(0, Math.round(3 + 0.6 * (target - 2)) - 1);
+    for (let t = 1; t <= 4; t++) {
+      let guard = 0;
+      while (guard++ < 120) {
+        const budget = cur[t - 1];
+        if (budget <= 0 || budget < waiting[t]) break;
+        let minNext = Infinity;
+        for (const u of BY_TIER[t]) {
+          if (P < u.unlock || !u.rel || u.kind === 'capcap') continue;
+          const L = lv[u.id];
+          if (L >= maxLevel(u, lv)) continue;
+          const c = nextCost(u, L);
+          if (c < minNext) minNext = c;
+        }
+        if (budget < minNext) break;
+        waiting[t] = 0;
+        const baseJ = evalBuild(st, target, lambda).J;
+        frozen = RULES && RF.freeze && st.dmg >= dReq;
+        // at the start of a prestige, put T2 into several levels of -1 Enemy Attack Damage before buying plain HP
+        const hpSkip = RULES && RF.hpSkip && P < 99 && usefulEdmg > 0 && (lv[edmgU.id] || 0) < Math.min(5, usefulEdmg);
+        let best = null, bestAff = null;
+        // earlier upgrades in the tier that still need their first level before `u` unlocks
+        const missingChain = (u) => {
+          const out = [];
+          let p = u.prev;
+          while (p && (lv[p.id] || 0) < 1) {
+            if (P < p.unlock) return null;
+            out.unshift(p);
+            p = p.prev;
+          }
+          return out;
+        };
+        // Cap of Cap Upgrades is cheap and only matters once a cap upgrade is full, so buy it as soon as that happens
+        if (t === 4) {
+          const cu = BY_ID[CAPCAP_ID];
+          const Lc = lv[cu.id] || 0;
+          if (P >= cu.unlock && Lc < 10) {
+            const anyFull = [1, 2, 3, 4].some(tt => {
+              const c2 = BY_ID[CAP_ID[tt]];
+              return P >= c2.unlock && (lv[c2.id] || 0) >= 1 && lv[c2.id] >= maxLevel(c2, lv);
+            });
+            const miss = anyFull ? missingChain(cu) : null;
+            if (miss) {
+              const items = [];
+              let cost = 0;
+              for (const p of miss) { const c0 = nextCost(p, 0); cost += c0; items.push({ id: p.id, from: 0, to: 1, cost: c0 }); }
+              const own = nextCost(cu, Lc); cost += own; items.push({ id: cu.id, from: Lc, to: Lc + 1, cost: own });
+              if (cost <= budget) {
+                for (const it of items) {
+                  lv[it.id] = it.to; cur[t - 1] -= it.cost;
+                  const last = out[out.length - 1];
+                  if (last && last.id === it.id && last.to === it.from) { last.to = it.to; last.cost += it.cost; }
+                  else out.push({ tier: t, id: it.id, name: BY_ID[it.id].name, from: it.from, to: it.to, cost: it.cost });
+                }
+                st = computeStats(P, gems, lv);
+                continue;
+              }
+            }
+          }
+        }
+        const consider = (items, mods, cost, weight) => {
+          const gain = trial(mods) - baseJ;
+          if (gain <= (RULES && RF.minGain ? 0.01 : 1e-7)) return;
+          const cand = { items, cost, ratio: gain * (weight || 1) / cost };
+          if (!best || cand.ratio > best.ratio) best = cand;
+          if (cost <= budget && (!bestAff || cand.ratio > bestAff.ratio)) bestAff = cand;
+        };
+        for (const u of BY_TIER[t]) {
+          if (P < u.unlock || u.kind === 'capcap' || !u.rel) continue;
+          if (ablate && ablate.has(u.id)) continue;   // analysis only: never bought directly (still bought as a 1-level unlock prerequisite)
+          const L = lv[u.id], mx = maxLevel(u, lv);
+          if (L >= mx) continue;
+          const miss = missingChain(u);
+          if (miss === null) continue;
+          let preCost = 0;
+          const preItems = [], preMods = [];
+          for (const p of miss) {
+            const c0 = nextCost(p, 0);
+            preCost += c0; preItems.push({ id: p.id, from: 0, to: 1, cost: c0 }); preMods.push([p.id, 1]);
+          }
+          if (u.kind === 'cap') {
+            let cost = nextCost(u, L) + preCost;
+            const items = preItems.concat([{ id: u.id, from: L, to: L + 1, cost: nextCost(u, L) }]);
+            const mods = preMods.concat([[u.id, 1]]);
+            for (const v of BY_TIER[t]) {
+              if (v.kind || !v.rel || P < v.unlock) continue;
+              const Lv = lv[v.id];
+              if (Lv >= maxLevel(v, lv)) {
+                const c2 = nextCost(v, Lv);
+                cost += c2; mods.push([v.id, 1]); items.push({ id: v.id, from: Lv, to: Lv + 1, cost: c2 });
+              }
+            }
+            if (items.length < 2 + preItems.length || cost > budget * 2.5) continue;
+            consider(items, mods, cost);
+            continue;
+          }
+          const room = mx - L;
+          let ks = SIZES.filter(k => k < room);
+          ks.push(room);
+          let weight = 1;
+          if (RULES) {
+            if (isPureHp(u) && hpSkip) continue;
+            if (isPureAtk(u) && RF.atkCounts) {
+              if (frozen) continue;
+              // buy in counts that land exactly on a one-hit breakpoint, never in 2-3 level scraps
+              let wStar = 0;
+              for (let w = 1; w < target; w++) if (EHP[w] > st.dmg) { wStar = w; break; }
+              if (!wStar) continue;
+              const needs = [EHP[wStar], EHP[Math.min(target - 1, wStar + 4)], dReq];
+              const found = [];
+              for (const need of needs) {
+                for (let k = 1; k <= room; k++) {
+                  lv[u.id] = L + k;
+                  const d = computeStats(P, gems, lv).dmg;
+                  if (d >= need) { found.push(k); break; }
+                }
+                lv[u.id] = L;
+              }
+              ks = found.filter((k, i) => found.indexOf(k) === i).sort((a, b) => a - b);
+              if (!ks.length) ks = [room];
+            }
+            // Soft caps only: stop favoring upgrades whose stat no longer matters.
+            if (RF.weights && target >= 205 && st.hp >= HP_REQ && u.fx.hp) weight *= 0.25;   // 150k HP is plenty in the end game
+            if (RF.weights && u.fx.pb && frozen && st.hp >= HP_REQ) weight = 0.25;            // prestige bonus only boosts HP and damage, both capped
+          }
+          if (catW && catW[u.cat] != null) weight *= catW[u.cat];
+          for (const k of ks) {
+            const own = COST[u.id].pref[L + k] - COST[u.id].pref[L];
+            const cost = own + preCost;
+            if (cost > budget * 2.5 && k > 1) break;
+            consider(preItems.concat([{ id: u.id, from: L, to: L + k, cost: own }]), preMods.concat([[u.id, k]]), cost, weight);
+          }
+        }
+        let pick = null;
+        if (best && best.cost <= budget) pick = best;
+        else if (best) {
+          if (bestAff && bestAff.ratio >= 0.6 * best.ratio) pick = bestAff;
+          else { waiting[t] = best.cost; break; }
+        } else break;
+        for (const it of pick.items) {
+          lv[it.id] = it.to; cur[t - 1] -= it.cost;
+          const last = out[out.length - 1];
+          if (last && last.id === it.id && last.to === it.from) { last.to = it.to; last.cost += it.cost; }
+          else out.push({ tier: t, id: it.id, name: BY_ID[it.id].name, from: it.from, to: it.to, cost: it.cost });
+        }
+        st = computeStats(P, gems, lv);
+      }
+    }
+    return out;
+  }
+
+  /* ---------- Campaign simulation ---------- */
+  // o: { P, gems, lv, cur, remainH, goal, intervalH, lambda }
+  function simulate(o) {
+    let P = o.P;
+    const gems = o.gems, goal = o.goal, remainH = o.remainH, lambda = o.lambda;
+    const adaptG = o.adaptG || 0;               // adaptive check-ins: target J gain per check-in
+    const GAPS = [0.25, 0.5, 1, 2, 4, 8];
+    const snapGap = (x) => { let best = GAPS[0], bd = Infinity; for (const g of GAPS) { const d = Math.abs(Math.log(g / Math.max(x, 1e-6))); if (d < bd) { bd = d; best = g; } } return best; };
+    let lastCheckT = null, phaseStartT = 0;
+    let justPrestiged = !!o.fresh || (o.cur.every(c => !c) && !Object.keys(o.lv || {}).some(k => o.lv[k]));
+    const lv = {};
+    UPG.forEach(u => { lv[u.id] = (o.lv && o.lv[u.id]) || 0; });
+    let cur = o.cur.slice();
+    const path = o.path ? o.path.filter(m => m[1] > P && m[0] < goal) : pathFor(P, goal);
+    let pi = 0, t = 0, prev = null, maxWave = 1, completion = null;
+    let waiting = [0, 0, 0, 0, 0];
+    let phase = null;
+    const events = [];
+    let guard = 0;
+    while (guard++ < 20000) {
+      const target = pi < path.length ? path[pi][0] : goal;
+      const before = cur.slice();
+      const Jb = adaptG ? evalBuild(computeStats(P, gems, lv), target, lambda).J : 0;
+      const buys = spendAll({ P, gems, lv, cur, target, lambda, waiting, rules: o.rules, ablate: o.ablate, catW: o.catW });
+      const st = computeStats(P, gems, lv);
+      const gain = adaptG ? Math.max(0, evalBuild(st, target, lambda).J - Jb) : 0;
+      const prof = evalBuild(st, target, 0);
+      if (prof.wave > maxWave) maxWave = prof.wave;
+      const full = prof.capable ? evalBuild(st, Math.max(251, goal + 1), 0) : prof;
+      const ev = { type: 'checkin', t, P, target, tier: pi < path.length ? path[pi][1] : null, before, buys, wave: prof.wave, cleared: full.cleared, x: full.x,
+        capable: prof.capable, tTarget: prof.capable ? prof.tTarget : null, runMin: prof.runH * 60, hp: st.hp, dmg: st.dmg };
+      if (o.debug) ev.lv = Object.assign({}, lv);
+      events.push(ev);
+      if (prof.capable) {
+        const lag = prev ? prev.runH / 2 : 0;
+        const tReady = t + lag + prof.tTarget;
+        if (pi >= path.length) {
+          if (tReady <= remainH) { completion = tReady; ev.finish = tReady; }
+          else {
+            const frac = Math.max(0, (remainH - t - lag) / prof.tTarget);
+            maxWave = Math.max(maxWave, Math.floor(target * Math.min(1, frac)));
+          }
+          break;
+        }
+        if (tReady > remainH) break;
+        const to = path[pi][1];
+        events.push({ type: 'prestige', t: tReady, from: P, to, wave: target, stats: st });
+        P = to; pi++;
+        UPG.forEach(u => { lv[u.id] = 0; });
+        cur = [0, 0, 0, 0]; waiting = [0, 0, 0, 0, 0]; prev = null; t = tReady;
+        justPrestiged = true; lastCheckT = null; phaseStartT = tReady;
+        continue;
+      }
+      if (o.stallH) {
+        if (!phase || phase.P !== P) phase = { P, best: -1, tBest: t };
+        if (prof.cleared > phase.best) { phase.best = prof.cleared; phase.tBest = t; }
+        const W = Math.floor((phase.best + 1) / 5) * 5;
+        const tier = Math.max(0, W / 5 - 1);
+        if (t - phase.tBest >= o.stallH && W >= 5 * (P + 2) && tier >= P + (o.minTierGain || 3) && W < goal) {
+          // prestige at the best wave this build reaches
+          const stW = computeStats(P, gems, lv);
+          const pw = evalBuild(stW, W, 0);
+          if (pw.capable) {
+            const tReady2 = t + (prev ? prev.runH / 2 : 0) + pw.tTarget;
+            if (tReady2 > remainH) break;
+            events.push({ type: 'prestige', t: tReady2, from: P, to: tier, wave: W, stats: stW });
+            P = tier; UPG.forEach(u => { lv[u.id] = 0; });
+            cur = [0, 0, 0, 0]; waiting = [0, 0, 0, 0, 0]; prev = null; t = tReady2; phase = null;
+            continue;
+          }
+        }
+      }
+      // accumulate until the next check-in
+      const inc = incomePerRun(prof.cleared, gems, st);
+      let dt = o.intervalH;
+      if (adaptG) {
+        if (justPrestiged) dt = 0.5;
+        else {
+          let tAfford = Infinity;
+          for (let k = 0; k < 4; k++) {
+            const need = waiting[k + 1] - cur[k], rate = inc[k] / prof.runH;
+            if (waiting[k + 1] > 0 && need > 0 && rate > 0) tAfford = Math.min(tAfford, need / rate);
+          }
+          // early in a phase upgrades are cheap and every visit pays off, so the gap may only grow as the phase ages
+          const capGap = Math.max(0.5, 0.4 * (t - phaseStartT));
+          if (!buys.length && tAfford < Infinity) dt = snapGap(Math.min(tAfford, capGap));
+          else {
+            const gap = lastCheckT == null ? (o.prevGapH || 1) : t - lastCheckT;
+            dt = snapGap(Math.min(adaptG / Math.max(gain / Math.max(gap, 0.05), 1e-9), capGap));
+          }
+        }
+        justPrestiged = false;
+      }
+      lastCheckT = t;
+      ev.gap = dt; ev.gain = gain;
+      const incOld = prev ? prev.inc : null;
+      const lagH = prev ? Math.min(dt, prev.runH / 2) : 0;
+      for (let k = 0; k < 4; k++) {
+        const newRate = inc[k] / prof.runH;
+        const oldRate = incOld ? incOld[k] / prev.runH : newRate;
+        cur[k] += oldRate * lagH + newRate * (dt - lagH);
+      }
+      prev = { runH: prof.runH, inc };
+      t += dt;
+      if (t >= remainH) break;
+    }
+    return { attainable: completion != null, completionH: completion, maxWave: completion != null ? goal : maxWave, events, finalP: P };
+  }
+
+  return {
+    UPG, BY_ID, BY_TIER, CAP_ID, CAPCAP_ID, COST, MIL, EHP, GEM_SETS,
+    setModel, setWalk, setRules, setHpReq, nextCost, maxLevel, gemCost, gemMax, computeStats, enemyAt, evalBuild, incomePerRun, tierAtWave, pathFor, simulate
+  };
+})();
+
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const E = Engine;
+  const LS_KEY = 'evcalc.v3';
+  const TIER_NAME = ['', 'T1', 'T2', 'T3', 'T4'];
+  const INTERVALS = [0.25, 0.5, 1, 2, 4, 8];
+  const ADAPT_G = [0.7, 2, 5, 12];
+  // Alternative end-game prestige routes. The standard route (E.MIL) is the fallback.
+  const ALT_PATHS = [
+    { name: 'P39 at W200', path: [[10, 1], [15, 2], [20, 3], [30, 5], [55, 10], [105, 20], [200, 39]] },
+    { name: 'P40 at W205', path: [[10, 1], [15, 2], [20, 3], [30, 5], [55, 10], [105, 20], [205, 40]] },
+    { name: 'P25 at W130, P39 at W200', path: [[10, 1], [15, 2], [20, 3], [30, 5], [55, 10], [105, 20], [130, 25], [200, 39]] },
+    { name: 'P31 at W160, P43 at W220', path: [[10, 1], [15, 2], [20, 3], [30, 5], [55, 10], [105, 20], [160, 31], [220, 43]] }
+  ];
+  const LAMBDAS = [10, 30];
+  const EVENT_MONTHS = [1, 3, 5, 7, 9, 11]; // Feb, Apr, Jun, Aug, Oct, Dec
+  const STD_SET = { hp: 3, atk: 0, speed: 1, x2: 1 };
+
+  function defaults() {
+    return { P: 0, useGems: false, gems: { atk: 0, hp: 0, speed: 0, x2: 0 }, cur: [0, 0, 0, 0], lv: {},
+      manual: false, days: 0, hours: 0, mins: 0, goal: 250, interval: 'auto', lastCheckin: null, ui: {} };
+  }
+  let S = defaults();
+  let hadSaved = false;
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) { hadSaved = true; const o = JSON.parse(raw); S = Object.assign(defaults(), o); S.gems = Object.assign(defaults().gems, o.gems || {}); }
+  } catch (e) { /* storage unavailable */ }
+  S.ui = S.ui || {};
+  S.curAt = S.curAt || S.lastCheckin || Date.now();
+  if (S.ui.tab === undefined) S.ui.tab = hadSaved ? 'plan' : 'setup'; // first visit on a phone starts on Setup
+  function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+  function isOpen(k, def) { return S.ui[k] === undefined ? def : !!S.ui[k]; }
+  // collapsible panel; its open/closed state is remembered
+  function det(k, title, body, def) {
+    return '<section class="panel"><details data-k="' + k + '"' + (isOpen(k, def) ? ' open' : '') + '><summary>' + title + '</summary>' + body + '</details></section>';
+  }
+  document.addEventListener('toggle', e => {
+    const d = e.target;
+    if (d && d.dataset && d.dataset.k) { S.ui[d.dataset.k] = d.open; save(); }
+  }, true);
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  function num(v, d) { const n = parseFloat(v); return isFinite(n) ? n : d; }
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+  function fmt(n) {
+    n = Math.round(n);
+    if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+    if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (Math.abs(n) >= 1e4) return (n / 1e3).toFixed(1) + 'k';
+    return n.toLocaleString('en-US');
+  }
+  function f2(n) { return (Math.round(n * 100) / 100).toString(); }
+  const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const HP_REQ = 150000;
+  function hpNote() { return ''; }
+  // fights count down 5..1 inside a wave; x = waves cleared (fractional). Returns the last fight you should clear, e.g. 27-2
+  function wl(x) {
+    if (x >= 250) return '250';
+    const c = Math.floor(x + 1e-9), f = Math.floor((x - c) * 5 + 1e-9);
+    if (c === 0 && f === 0) return 'W1-5';
+    return 'W' + (f === 0 ? c + '-1' : (c + 1) + '-' + (6 - f));
+  }
+  function dur(h) {
+    const m = Math.max(0, Math.round(h * 60));
+    return Math.floor(m / 1440) + 'd ' + Math.floor((m % 1440) / 60) + 'h ' + (m % 60) + 'm';
+  }
+  function durShort(h) {
+    const m = Math.max(1, Math.round(h * 60));
+    if (m < 60) return m + ' min';
+    if (m < 1440) return Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '');
+    return Math.floor(m / 1440) + 'd' + (Math.floor((m % 1440) / 60) ? ' ' + Math.floor((m % 1440) / 60) + 'h' : '');
+  }
+  function ivLabel(h) { return h < 1 ? Math.round(h * 60) + ' min' : (h === 1 ? '1 hour' : h + ' hours'); }
+  function tag(t) { return '<span class="tag t' + t + '">' + TIER_NAME[t] + '</span>'; }
+  function clock(ms) {
+    return new Date(ms).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+  function longClock(ms) {
+    return new Date(ms).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  }
+
+  /* ---------- event schedule: 21:00 UTC on the 1st to 21:00 UTC on the last day, Feb/Apr/Jun/Aug/Oct/Dec ---------- */
+  function eventWindow(now) {
+    const y = new Date(now).getUTCFullYear();
+    for (let yy = y - 1; yy <= y + 1; yy++) {
+      for (const m of EVENT_MONTHS) {
+        const start = Date.UTC(yy, m, 0, 22, 0, 0), end = Date.UTC(yy, m + 1, 0, 22, 0, 0); // last day of the previous month and of this month, 22:00 UTC
+        if (end > now) return { start, end };
+      }
+    }
+    return null;
+  }
+  function eventState() {
+    const now = Date.now();
+    const w = eventWindow(now);
+    const begin = Math.max(now, w.start);
+    let remainH = (w.end - begin) / 3600000;
+    let T0 = begin;
+    if (S.manual) {
+      remainH = Math.max(0, num(S.days, 0)) * 24 + Math.max(0, num(S.hours, 0)) + Math.max(0, num(S.mins, 0)) / 60;
+      T0 = now;
+    }
+    return { now, w, started: now >= w.start, remainH, T0 };
+  }
+
+  /* ---------- state -> engine inputs ---------- */
+  // Level rules: locked by prestige tier, locked until the row above has a level, and capped by the tier's cap upgrades.
+  function clampLevels(P, rawLv) {
+    const lv = {}, raw = {};
+    for (let t = 1; t <= 4; t++) E.BY_TIER[t].forEach(u => {
+      let L = Math.max(0, Math.round(num(rawLv[u.id], 0)));
+      if (P < u.unlock || (u.prev && raw[u.prev.id] < 1)) L = 0;
+      raw[u.id] = L;
+    });
+    const order = E.UPG.slice().sort((a, b) => (a.kind === 'capcap' ? 0 : a.kind === 'cap' ? 1 : 2) - (b.kind === 'capcap' ? 0 : b.kind === 'cap' ? 1 : 2));
+    order.forEach(u => { lv[u.id] = clamp(raw[u.id], 0, E.maxLevel(u, lv)); });
+    return lv;
+  }
+  function normalized() {
+    const P = clamp(Math.round(num(S.P, 0)), 0, 100000);
+    const gm = E.gemMax(P);
+    const ownedGems = {
+      atk: clamp(Math.round(num(S.gems.atk, 0)), 0, gm.atk), hp: clamp(Math.round(num(S.gems.hp, 0)), 0, gm.hp),
+      speed: clamp(Math.round(num(S.gems.speed, 0)), 0, gm.speed), x2: clamp(Math.round(num(S.gems.x2, 0)), 0, 1)
+    };
+    const gems = S.useGems ? ownedGems : { atk: 0, hp: 0, speed: 0, x2: 0 };
+    const lv = clampLevels(P, S.lv);
+    const es = eventState();
+    return { P, gems, ownedGems, lv, cur: S.cur.map(v => Math.max(0, num(v, 0))), remainH: clamp(es.remainH, 0.25, 24 * 120), T0: es.T0,
+      goal: clamp(Math.round(num(S.goal, 250)), 5, 1000), interval: S.interval === 'auto' ? 'auto' : num(S.interval, 1),
+      gm,
+      prevGapH: S.lastCheckin ? clamp((es.now - S.lastCheckin) / 3600000, 0.05, 48) : null };
+  }
+
+  /* ---------- inputs ---------- */
+  function field(label, id, val, opts) {
+    opts = opts || {};
+    return '<div class="field"><label for="' + id + '">' + label + (opts.hint ? '<small' + (opts.hintId ? ' id="' + opts.hintId + '"' : '') + '>' + opts.hint + '</small>' : '') + '</label>' +
+      '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="' + id + '" value="' + val + '"' + '></div>';
+  }
+  function buildInputs() {
+    let h = '';
+    // 0. Event settings
+    h += '<section class="panel"><h2><span class="stepno">0</span>Event Settings</h2>' + field('Wave goal', 'in_goal', S.goal, { min: 5, hint: 'Default 250' });
+    h += '<div class="field"><label for="in_interval">Time between upgrade sets</label><select id="in_interval"><option value="auto">Auto</option>' + INTERVALS.map(v => '<option value="' + v + '">' + ivLabel(v) + '</option>').join('') + '</select></div>';
+    h += '<p class="note" id="ivDesc">' + lastIvDesc + '</p>';
+    h += '<label class="chk"><input type="checkbox" id="in_manual"' + (S.manual ? ' checked' : '') + '> Set the time left manually</label>';
+    h += '<div id="manualTime"' + (S.manual ? '' : ' hidden') + '><div class="field"><label>Time left</label><div class="timefield">' +
+      '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_days" value="' + S.days + '"><span>d</span>' +
+      '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_hours" value="' + S.hours + '"><span>h</span>' +
+      '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_mins" value="' + S.mins + '"><span>m</span></div></div></div></section>';
+    // 1. Prestige
+    h += '<section class="panel"><h2><span class="stepno">1</span>Prestige</h2>' + field('Prestige tier', 'in_P', S.P, { hint: 'Whole number' }) + '<p class="pinfo" id="presInfo"></p></section>';
+    // 2. Currency
+    h += '<section class="panel"><h2><span class="stepno">2</span>Event Currency</h2><div class="curgrid">';
+    for (let t = 1; t <= 4; t++) h += '<label class="cur t' + t + '" for="in_cur' + t + '"><span class="tag t' + t + '">T' + t + '</span><input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_cur' + t + '" value="' + Math.round(S.cur[t - 1]) + '" aria-label="Tier ' + t + ' currency"></label>';
+    h += '</div></section>';
+    // 3. Gems
+    h += '<section class="panel" id="gemsPanel"><details data-k="gems"' + (isOpen('gems', true) ? ' open' : '') + '><summary><span class="stepno">3</span>Gems</summary><p class="note" id="gemNote">Gems are optional.</p>';
+    h += '<label class="chk"><input type="checkbox" id="in_usegems"' + (S.useGems ? ' checked' : '') + '> Use gems</label>';
+    h += '<div id="gemFields"' + (S.useGems ? '' : ' hidden') + '>';
+    h += '<div class="colhead g"><span>Gem upgrade</span><span>Rec.</span><span>Level</span><span>Max</span></div>';
+    const gemRow = (key, label, input) => '<div class="grow"><div class="nm">' + label + '</div><span class="rc" id="rec_' + key + '">-</span>' + input + '<span class="mx" id="max_' + key + '"></span></div>';
+    h += gemRow('hp', 'Max HP <i>+10% each</i>', '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_ghp" value="' + S.gems.hp + '" aria-label="Max HP gem level">');
+    h += gemRow('atk', 'Attack Damage <i>+10% each</i>', '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_gatk" value="' + S.gems.atk + '" aria-label="Attack Damage gem level">');
+    h += gemRow('speed', 'Event Speed <i>+125% each</i>', '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="in_gspeed" value="' + S.gems.speed + '" aria-label="Event Speed gem level">');
+    h += gemRow('x2', '2x Event Currency', '<input type="checkbox" id="in_gx2"' + (S.gems.x2 ? ' checked' : '') + ' aria-label="2x Event Currency owned">');
+    h += '<p class="limits" id="gemLimits"></p><p class="note" id="gemSummary"></p></div></details></section>';
+    // 4. Upgrades
+    h += '<section class="panel"><details data-k="upgrades"' + (isOpen('upgrades', true) ? ' open' : '') + '><summary><span class="stepno">4</span><span>Upgrades</span><span class="sumcount" id="upSum"></span></summary>';
+    h += '<p class="note">Locked rows open with your prestige tier or the row above.</p>';
+    h += '<div class="colhead"><span>Upgrade</span><span>Level</span><span>Max</span><span>Next</span></div>';
+    for (let t = 1; t <= 4; t++) {
+      h += '<div class="tierhead plain t' + t + '"><b>Tier ' + t + '</b><span class="tc" id="tc_' + t + '"></span></div>';
+      E.BY_TIER[t].forEach(u => {
+        h += '<div class="urow t' + t + '" id="row_' + u.id + '"><div class="nm">' + u.name + '</div>' +
+          '<input class="int" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" id="lv_' + u.id + '" value="' + (S.lv[u.id] || 0) + '" aria-label="' + u.name + ' level">' +
+          '<span class="mx"></span><span class="cs"></span></div>';
+      });
+    }
+    h += '</details></section>';
+    $('#inputs').innerHTML = h;
+    $('#in_interval').value = String(S.interval);
+    wire();
+    refreshRows();
+    renderEventInfo();
+    if (lastGemInfo) applyGemInfo(lastGemInfo);
+  }
+  function refreshRows() {
+    const n = normalized();
+    E.UPG.forEach(u => {
+      const row = $('#row_' + u.id), inp = $('#lv_' + u.id);
+      if (!row || !inp) return;
+      const mx = E.maxLevel(u, n.lv), L = n.lv[u.id];
+      const prestigeLocked = n.P < u.unlock;
+      const chainLocked = !prestigeLocked && u.prev && n.lv[u.prev.id] < 1;
+      const locked = prestigeLocked || chainLocked;
+      row.classList.toggle('locked', locked);
+      inp.disabled = locked; inp.max = mx;
+      // never let a level sit above what is possible (cap upgrades, prestige tier, unlock chain)
+      if (num(inp.value, 0) > L || (locked && inp.value !== '0')) { inp.value = L; S.lv[u.id] = L; }
+      row.querySelector('.mx').textContent = locked ? '' : mx;
+      const cs = row.querySelector('.cs');
+      if (prestigeLocked) { cs.innerHTML = '<span class="pill">' + LOCK + 'P' + u.unlock + '</span>'; delete cs.dataset.k; }
+      else if (chainLocked) { cs.innerHTML = '<span class="pill">' + LOCK + 'row above first</span>'; delete cs.dataset.k; }
+      else if (L >= mx) { cs.innerHTML = '<span class="pill ok">max</span>'; delete cs.dataset.k; }
+      else { cs.textContent = fmt(E.nextCost(u, L)); cs.dataset.k = 'cost'; }
+      row.title = prestigeLocked ? 'Unlocks at prestige tier ' + u.unlock + '.' : (chainLocked ? 'Buy at least 1 level of the upgrade above this one first.' : '');
+      row.setAttribute('aria-disabled', locked ? 'true' : 'false');
+    });
+    // how much of each tier is open at this prestige tier
+    let openAll = 0;
+    for (let t = 1; t <= 4; t++) {
+      const list = E.BY_TIER[t], o = list.filter(u => n.P >= u.unlock).length;
+      openAll += o;
+      const el = $('#tc_' + t); if (el) el.textContent = o + ' of ' + list.length + ' open';
+    }
+    const us = $('#upSum'); if (us) us.textContent = openAll + ' of ' + E.UPG.length + ' open';
+    const pi = $('#presInfo');
+    if (pi) {
+      let nextP = null;
+      E.UPG.forEach(u => { if (u.unlock > n.P && (nextP === null || u.unlock < nextP)) nextP = u.unlock; });
+      const names = nextP === null ? [] : E.UPG.filter(u => u.unlock === nextP).map(u => u.name);
+      pi.textContent = nextP === null ? 'Every upgrade is open.' : 'Next unlock at P' + nextP + ': ' + names.slice(0, 2).join(', ') + (names.length > 2 ? ' and ' + (names.length - 2) + ' more' : '') + '.';
+    }
+    const gl = $('#gemLimits');
+    if (gl) gl.textContent = 'Max at P' + n.P + ': HP and Attack ' + n.gm.hp + ', Event Speed ' + n.gm.speed + '.';
+    // gem levels: max depends on the prestige tier
+    const gm = n.gm;
+    [['hp', 'in_ghp', gm.hp], ['atk', 'in_gatk', gm.atk], ['speed', 'in_gspeed', gm.speed]].forEach(([k, id, mx]) => {
+      const el = $('#' + id); if (!el) return;
+      el.max = mx;
+      if (num(el.value, 0) > mx) { el.value = mx; S.gems[k] = mx; }
+      const m = $('#max_' + k); if (m) m.textContent = mx;
+    });
+    const mx2 = $('#max_x2'); if (mx2) mx2.textContent = 'yes';
+  }
+  function renderEventInfo() {
+    const es = eventState();
+    const lab = $('#tbLab'), big = $('#tbBig'), sub = $('#tbSub');
+    if (!lab) return;
+    if (!es.started) { lab.textContent = 'Event starts in'; big.textContent = dur((es.w.start - es.now) / 3600000); sub.textContent = 'Starts ' + longClock(es.w.start); return; }
+    lab.textContent = S.manual ? 'Time left (set manually)' : 'Event time left';
+    big.textContent = dur(es.remainH);
+    sub.textContent = S.manual ? 'The real event ends ' + longClock(es.w.end) : 'Ends ' + longClock(es.w.end);
+  }
+
+  let timer = null;
+  // The plan updates by itself as values change. The Update plan button only shows if a change has not been applied for a while.
+  let dirtyTimer = null, dirty = false;
+  function markDirty() { dirty = true; clearTimeout(dirtyTimer); dirtyTimer = setTimeout(() => { if (dirty) $('#updateBar').classList.add('show'); }, 4000); }
+  function clearDirty() { dirty = false; clearTimeout(dirtyTimer); $('#updateBar').classList.remove('show'); }
+  function schedule() { markDirty(); clearTimeout(timer); timer = setTimeout(compute, 600); }
+  function bindNum(id, setter, hardMax) {
+    const el = $('#' + id);
+    if (hardMax != null) el.max = hardMax;
+    el.addEventListener('input', () => {
+      if (hardMax != null && num(el.value, 0) > hardMax) el.value = hardMax; // no value above the maximum possible
+      setter(el.value); refreshRows(); save(); renderEventInfo(); schedule();
+    });
+  }
+  // Lowering or clearing a field can trim other fields (a cap upgrade lowers the other rows' maximums, a row at 0 locks
+  // the rows below it, a lower prestige tier locks upgrades). So while typing, only increases are applied. A lower or empty
+  // value waits until the field loses focus, and if it would change other fields the player is asked first.
+  function guardedField(el, o) {
+    let before = 0, busy = false;
+    el.addEventListener('focus', () => { before = o.before(); });
+    el.addEventListener('input', () => {
+      markDirty();
+      if (o.hardMax != null && num(el.value, 0) > o.hardMax) el.value = o.hardMax;
+      const raw = el.value.trim(), v = raw === '' ? NaN : Math.round(parseFloat(raw));
+      // increases apply at once; a lower value also applies at once when it cannot trim anything else
+      if (isFinite(v) && (v >= before || (!o.always && o.affected(Math.max(0, v)).length === 0))) { o.commit(Math.max(0, v)); refreshRows(); save(); renderEventInfo(); schedule(); }
+    });
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); });
+    el.addEventListener('blur', () => {
+      if (busy) return;
+      busy = true;
+      try {
+        const raw = el.value.trim();
+        const v = raw === '' ? 0 : Math.max(0, Math.round(parseFloat(raw)) || 0);
+        const cleared = raw === '' && before > 0;
+        if (v < before) {
+          const aff = o.affected(v);
+          if ((aff.length || o.always) && !window.confirm(o.message(v, cleared, before, aff))) { o.commit(before); el.value = before; refreshRows(); save(); schedule(); return; }
+        }
+        o.commit(v); el.value = v;
+        refreshRows(); save(); renderEventInfo(); schedule();
+      } finally { busy = false; }
+    });
+  }
+  function lossList(aff) {
+    return aff.slice(0, 4).map(a => a.name + ' ' + a.before + ' to ' + a.after).join('; ') + (aff.length > 4 ? '; and ' + (aff.length - 4) + ' more' : '');
+  }
+  function guardUpgrade(u) {
+    const el = $('#lv_' + u.id); if (!el) return;
+    const isCap = u.kind === 'cap' || u.kind === 'capcap';
+    guardedField(el, {
+      before: () => normalized().lv[u.id],
+      commit: v => { S.lv[u.id] = v; },
+      always: isCap,
+      affected: v => {
+        const P = normalized().P, b = clampLevels(P, S.lv), a = clampLevels(P, Object.assign({}, S.lv, { [u.id]: v }));
+        return E.UPG.filter(w => w.id !== u.id && a[w.id] < b[w.id]).map(w => ({ name: w.name, before: b[w.id], after: a[w.id] }));
+      },
+      message: (v, cleared, before, aff) => {
+        if (isCap) {
+          const scope = u.kind === 'capcap' ? 'every tier cap upgrade' : 'the other Tier ' + u.tier + ' upgrades';
+          return (cleared ? 'You cleared "' + u.name + '", which had ' + before + ' levels. That sets it to 0.' : '"' + u.name + '" is now ' + v + ', lower than the ' + before + ' you had.') +
+            ' This also lowers the maximum of ' + scope + (aff.length ? ', so these levels will be reduced: ' + lossList(aff) + '.' : '. None of your current levels are above the new maximums.') + '\n\nKeep this value?';
+        }
+        return (cleared ? 'You cleared "' + u.name + '". ' : 'Setting "' + u.name + '" to ' + v + ' ') + 'locks the rows below it in Tier ' + u.tier + ', so these levels will reset: ' + lossList(aff) + '.\n\nKeep this value?';
+      }
+    });
+  }
+  function guardPrestige() {
+    const el = $('#in_P'); if (!el) return;
+    guardedField(el, {
+      before: () => normalized().P,
+      commit: v => { S.P = v; },
+      always: false,
+      affected: v => {
+        const n = normalized(), b = clampLevels(n.P, S.lv), a = clampLevels(v, S.lv), gm = E.gemMax(v), out = [];
+        E.UPG.forEach(w => { if (a[w.id] < b[w.id]) out.push({ name: w.name, before: b[w.id], after: a[w.id] }); });
+        [['Max HP gem', n.ownedGems.hp, gm.hp], ['Attack Damage gem', n.ownedGems.atk, gm.atk], ['Event Speed gem', n.ownedGems.speed, gm.speed]].forEach(([nm, cur, mx]) => { if (cur > mx) out.push({ name: nm, before: cur, after: mx }); });
+        return out;
+      },
+      message: (v, cleared, before, aff) => (cleared ? 'You cleared the prestige tier, which was ' + before + '. That sets it to P0, ' : 'Setting the prestige tier to P' + v + ' (from P' + before + ') ') + 'which locks upgrades and lowers the gem limits, so these will be reduced: ' + lossList(aff) + '.\n\nKeep this value?'
+    });
+  }
+  function wire() {
+    document.querySelectorAll('#inputs input.int').forEach(el => {
+      el.setAttribute('autocomplete', 'off'); el.setAttribute('enterkeyhint', 'done');
+      el.addEventListener('focus', () => setTimeout(() => { try { el.select(); } catch (e) { /* ignore */ } }, 0)); // easy to overwrite on a phone
+    });
+    bindNum('in_days', v => S.days = v, 31); bindNum('in_hours', v => S.hours = v, 23); bindNum('in_mins', v => S.mins = v, 59);
+    bindNum('in_goal', v => S.goal = v); 
+    bindNum('in_ghp', v => S.gems.hp = v); bindNum('in_gatk', v => S.gems.atk = v); bindNum('in_gspeed', v => S.gems.speed = v);
+    for (let t = 1; t <= 4; t++) bindNum('in_cur' + t, v => { S.cur[t - 1] = v; S.curAt = Date.now(); });
+    E.UPG.forEach(u => guardUpgrade(u));
+    guardPrestige();
+    $('#in_interval').addEventListener('change', e => { S.interval = e.target.value; save(); compute(); });
+    $('#in_gx2').addEventListener('change', e => { S.gems.x2 = e.target.checked ? 1 : 0; save(); schedule(); });
+    $('#in_usegems').addEventListener('change', e => {
+      S.useGems = e.target.checked; $('#gemFields').hidden = !S.useGems; save(); compute();
+    });
+    $('#in_manual').addEventListener('change', e => {
+      S.manual = e.target.checked;
+      if (S.manual) {
+        const es = eventState(); const m = Math.round((es.w.end - Math.max(es.now, es.w.start)) / 60000);
+        S.days = Math.floor(m / 1440); S.hours = Math.floor((m % 1440) / 60); S.mins = m % 60;
+        $('#in_days').value = S.days; $('#in_hours').value = S.hours; $('#in_mins').value = S.mins;
+      }
+      $('#manualTime').hidden = !S.manual; save(); renderEventInfo(); compute();
+    });
+
+  }
+  $('#btnReset').addEventListener('click', () => {
+    if (!window.confirm('Reset every input to its default?')) return;
+    const keep = S.ui; S = defaults(); S.ui = keep; OV = [null, null, null, null]; save(); lastGemInfo = null; buildInputs(); compute();
+  });
+  // Plan / Setup tabs (phones and narrow windows only; wide screens show both)
+  function setTab(t) {
+    S.ui.tab = t; save();
+    const g = $('#grid'); if (g) g.dataset.tab = t;
+    [['plan', '#tabPlan'], ['setup', '#tabSetup']].forEach(([k, sel]) => { const b = $(sel); if (b) b.setAttribute('aria-selected', k === t ? 'true' : 'false'); });
+  }
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }));
+  setTab(S.ui.tab);
+  setInterval(() => tick(), 20000);
+
+  /* ---------- optimiser pipeline ---------- */
+  function better(a, b) {
+    if (a.attainable && b.attainable) return a.completionH < b.completionH;
+    if (a.attainable !== b.attainable) return a.attainable;
+    return a.maxWave > b.maxWave;
+  }
+  function withGems(n, g) { return Object.assign({}, n, { gems: g }); }
+  // policy: a number (fixed interval in hours) or { G } (adaptive: target gain per visit)
+  function sim(n, policy, lambda, remainH, path) {
+    const o = { P: n.P, gems: n.gems, lv: n.lv, cur: n.cur, remainH: remainH || n.remainH, goal: n.goal, lambda, prevGapH: n.prevGapH };
+    if (path) o.path = path;
+    if (typeof policy === 'number') o.intervalH = policy; else o.adaptG = policy.G;
+    return E.simulate(o);
+  }
+  function* pipeline(n) {
+    let best = null;
+    for (let i = 0; i < LAMBDAS.length; i++) {
+      yield 'lambda';
+      const r = sim(n, 1, LAMBDAS[i]); r.lambda = LAMBDAS[i];
+      if (!best || better(r, best)) best = r;
+    }
+    const lambda = best.lambda;
+    let chosen, policy, adaptTable = [];
+    if (n.interval === 'auto') {
+      let topA = null;
+      for (let i = 0; i < ADAPT_G.length; i++) {
+        yield 'adaptive';
+        const r = sim(n, { G: ADAPT_G[i] }, lambda);
+        adaptTable.push({ G: ADAPT_G[i], r });
+        if (!topA || better(r, topA.r)) topA = { G: ADAPT_G[i], r };
+      }
+      let pick = topA;
+      adaptTable.forEach(x => {
+        const ok = topA.r.attainable
+          ? (x.r.attainable && x.r.completionH <= topA.r.completionH * 1.02 + 0.25)
+          : (!x.r.attainable && x.r.maxWave >= topA.r.maxWave - 1);
+        if (ok && x.G > pick.G) pick = x;
+      });
+      chosen = pick.r; policy = { type: 'auto', G: pick.G, arg: { G: pick.G } };
+    } else {
+      const iv = n.interval;
+      yield 'own';
+      chosen = sim(n, iv, lambda); policy = { type: 'fixed', iv, arg: iv };
+    }
+    // look for a faster prestige route; the standard route stays as the fallback
+    let usedPath = null, pathInfo = null;
+    {
+      const sigOf = p => JSON.stringify(p.filter(m => m[1] > n.P && m[0] < n.goal));
+      const seen = new Set([sigOf(E.MIL)]), uniq = [];
+      ALT_PATHS.forEach(a => { const s = sigOf(a.path); if (!seen.has(s)) { seen.add(s); uniq.push(a); } });
+      if (uniq.length) {
+        yield 'paths';
+        const origFast = sim(n, 2, lambda, null, E.MIL);
+        const tried = [];
+        for (const a of uniq) { yield 'paths'; tried.push({ a, r: sim(n, 2, lambda, null, a.path) }); }
+        let top = null;
+        tried.forEach(x => { if (!top || better(x.r, top.r)) top = x; });
+        const origChosen = chosen;
+        if (top && better(top.r, origFast)) {
+          yield 'paths';
+          const alt = sim(n, policy.arg, lambda, null, top.a.path);
+          const clearly = alt.attainable !== origChosen.attainable ? alt.attainable
+            : (alt.attainable ? alt.completionH < origChosen.completionH * 0.99 : alt.maxWave > origChosen.maxWave);
+          if (clearly) { chosen = alt; usedPath = top.a; }
+        }
+        pathInfo = { origFast, tried, origChosen, used: usedPath };
+      }
+    }
+    const pathArg = usedPath ? usedPath.path : null;
+    // when the goal is out of reach, also see what maxed gems (as available at this prestige tier) would manage
+    let maxed = null;
+    if (!chosen.attainable) {
+      yield 'maxed';
+      const mg = { atk: n.gm.atk, hp: n.gm.hp, speed: n.gm.speed, x2: 1 };
+      maxed = { gems: mg, r: sim(withGems(n, mg), policy.arg, lambda, null, usedPath ? usedPath.path : null) };
+    }
+    let needH = null, extMax = null;
+    if (!chosen.attainable) {
+      yield 'extend';
+      const ext = sim(n, policy.arg, lambda, Math.max(n.remainH * 6, 24 * 120), pathArg);
+      if (ext.attainable) needH = ext.completionH;
+      extMax = ext.maxWave;
+    }
+    return { adaptTable, policy, chosen, lambda, needH, extMax, pathArg, pathInfo, maxed };
+  }
+
+  let token = 0;
+  let PLAN = null;
+  let lastGemInfo = null;
+  let lastIvDesc = '';
+  function setBusy(b) { $('#top').classList.toggle('busy', b); }
+  function compute() {
+    clearTimeout(timer);
+    clearDirty();
+    const my = ++token;
+    const n = normalized();
+    setBusy(true);
+    const gen = pipeline(n);
+    function step() {
+      if (my !== token) return;
+      let r;
+      try { r = gen.next(); } catch (err) { $('#sbBig').textContent = 'Something went wrong'; $('#sbSub').textContent = err.message; setBusy(false); return; }
+      if (r.done) { render(n, r.value); setBusy(false); gemWork(n, r.value, my); }
+      else setTimeout(step, 0);
+    }
+    setTimeout(step, 20);
+  }
+
+  /* ---------- plan helpers ---------- */
+  function curLine(c) { return [0, 1, 2, 3].filter(i => c[i] > 0.5).map(i => TIER_NAME[i + 1] + ' ' + fmt(c[i])).join(', ') || 'nothing'; }
+  // Steps follow the real purchase order. A cap upgrade level closes the earlier steps of its tier, so a later level of an
+  // already-capped upgrade becomes its own step after the cap purchase instead of being folded into the earlier one.
+  function mergeSteps(buys) {
+    const steps = [], open = {};
+    buys.forEach(b => {
+      const u = E.BY_ID[b.id];
+      let s = open[b.id];
+      if (s && s.to === b.from) { s.to = b.to; s.cost += b.cost; }
+      else { s = { tier: b.tier, id: b.id, name: b.name, from: b.from, to: b.to, cost: b.cost, done: false }; steps.push(s); open[b.id] = s; }
+      if (u.kind === 'cap') E.BY_TIER[u.tier].forEach(v => { if (v.id !== b.id) delete open[v.id]; });
+      if (u.kind === 'capcap') [1, 2, 3, 4].forEach(t => { delete open[E.CAP_ID[t]]; });
+    });
+    return steps;
+  }
+  function syncInputs() {
+    for (let t = 1; t <= 4; t++) { const el = $('#in_cur' + t); if (el) el.value = Math.round(S.cur[t - 1]); }
+    E.UPG.forEach(u => { const el = $('#lv_' + u.id); if (el) el.value = S.lv[u.id] || 0; });
+  }
+  function shortClock(ms) {
+    const d = new Date(ms), t = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString(undefined, { weekday: 'short' }) + ' ' + t;
+  }
+  function fmtIn(ms) {
+    if (ms <= 30000) return 'now';
+    const m = Math.ceil(ms / 60000);
+    if (m < 60) return 'in ' + m + ' min';
+    const h = Math.floor(m / 60);
+    if (h < 24) return 'in ' + h + 'h ' + (m % 60) + 'm';
+    return 'in ' + Math.floor(h / 24) + 'd ' + (h % 24) + 'h';
+  }
+
+  /* ---------- waiting for currency: when you will hold enough for the next upgrade set ---------- */
+  // Boxes the player has typed into. A typed box keeps the player's number; the other boxes keep following the estimate.
+  let OV = [null, null, null, null];
+  function ciModel() {
+    const n = normalized();
+    const pend = PLAN.steps.filter(s => !s.done);
+    const lv2 = Object.assign({}, n.lv); pend.forEach(s => { lv2[s.id] = s.to; });
+    const st2 = E.computeStats(n.P, n.gems, lv2);
+    const prof = E.evalBuild(st2, PLAN.target, 0);
+    const inc = E.incomePerRun(prof.cleared, n.gems, st2);
+    return { n, pend, rate: inc.map(v => v / prof.runH) };
+  }
+  function dynCheckin() {
+    const m = ciModel(), now = Date.now();
+    const hrs = clamp((now - (S.curAt || now)) / 3600000, 0, 72);      // currency earned since it was last confirmed
+    const held = m.n.cur.map((c, k) => c + m.rate[k] * hrs);
+    m.pend.forEach(s => { held[s.tier - 1] -= s.cost; });              // minus what the pending purchases will spend
+    const est = held.slice();
+    if (PLAN.view === 'checkin') for (let k = 0; k < 4; k++) if (OV[k] != null) held[k] = OV[k];   // the player's own numbers win
+    const need = [0, 0, 0, 0];
+    if (PLAN.nextEv) PLAN.nextEv.buys.forEach(b => { need[b.tier - 1] += b.cost; });
+    const hasSet = need.some(v => v > 0);
+    let t = 0, stuck = false;
+    if (hasSet) {
+      for (let k = 0; k < 4; k++) {
+        const gap = need[k] - held[k];
+        if (gap > 0) { if (m.rate[k] > 0) t = Math.max(t, gap / m.rate[k]); else stuck = true; }
+      }
+    } else t = PLAN.nextWait;
+    t = clamp(stuck ? 48 : t, 0, 48);
+    if (t < 1 / 60) t = 0;
+    return { t, at: now + t * 3600000, need, held, est, hasSet };
+  }
+  function ciNeedText(ci) {
+    if (!ci.hasSet) return 'Nothing worth buying yet, so give the game a little more time.';
+    if (ci.t <= 0) return 'You should hold enough for the next set (' + curLine(ci.need) + '). Enter your currency if you like, then press Show my upgrade set.';
+    return 'Let your game run so currency builds up. The next set needs ' + curLine(ci.need) + '.';
+  }
+  function updateStatusCheckin() {
+    if (!PLAN) return;
+    const lab = $('#sbCheck .lab'), big = $('#ckBig'), sub = $('#ckSub');
+    if (PLAN.view === 'prestige') { lab.textContent = 'Next step'; big.textContent = 'Prestige'; sub.textContent = 'at wave ' + PLAN.target + ' for P' + PLAN.tier; return; }
+    if (PLAN.view === 'finish') { lab.textContent = 'Next step'; big.textContent = 'Goal run'; sub.textContent = 'W' + PLAN.n.goal; return; }
+    const ci = PLAN.ci; if (!ci) return;
+    lab.textContent = 'Next upgrade set';
+    big.textContent = ci.t <= 0 ? 'Ready' : fmtIn(ci.at - Date.now()).replace(/^in /, '');
+    sub.textContent = ci.t <= 0 ? 'Enter your currency' : 'Ready around ' + shortClock(ci.at);
+  }
+  function updateCiText() {
+    const ci = PLAN && PLAN.ci; if (!ci) return;
+    const clockEl = $('#ciClock'); if (clockEl) clockEl.textContent = ci.t <= 0 ? 'Ready now' : 'Ready around ' + shortClock(ci.at);
+    const cd = $('#ciCd'); if (cd) { cd.dataset.at = ci.at; cd.textContent = fmtIn(ci.at - Date.now()); cd.hidden = ci.t <= 0; }
+    const nd = $('#ciNeed'); if (nd) nd.textContent = ciNeedText(ci);
+    updateStatusCheckin();
+  }
+  function tick() {
+    renderEventInfo();
+    if (!PLAN) return;
+    if (PLAN.view === 'checkin') {
+      PLAN.ci = dynCheckin();
+      for (let t = 1; t <= 4; t++) {
+        const el = $('#nx_c' + t);
+        if (el && OV[t - 1] == null && document.activeElement !== el) el.value = Math.max(0, Math.round(PLAN.ci.est[t - 1]));   // never overwrite a number the player typed
+      }
+      updateCiText();
+    }
+    document.querySelectorAll('.cd[data-at]').forEach(el => { el.textContent = fmtIn(+el.dataset.at - Date.now()); if (el.id === 'ciCd') el.hidden = !!(PLAN.ci && PLAN.ci.t <= 0); });
+    updateStatusCheckin();
+  }
+
+  /* ---------- Next step: one panel that follows the plan (buy, then wait or prestige) ---------- */
+  function renderStep() {
+    const el = $('#stepPanel'); if (!el || !PLAN) return;
+    const steps = PLAN.steps;
+    const pending = steps.some(s => !s.done);
+    const n = normalized();
+    const st = E.computeStats(n.P, n.gems, n.lv);
+    const prof = E.evalBuild(st, PLAN.target, 0);
+    if (pending) PLAN.view = 'buy';
+    else if (prof.capable && PLAN.tier == null) PLAN.view = 'finish';
+    else if (prof.capable) PLAN.view = 'prestige';
+    else PLAN.view = 'checkin';
+    PLAN.ci = (PLAN.view === 'buy' || PLAN.view === 'checkin') ? dynCheckin() : null;
+    let h = '';
+    if (PLAN.view === 'buy') {
+      const firstOpen = steps.findIndex(s => !s.done);
+      h = '<h2>Buy now</h2>';
+      steps.forEach((s, i) => {
+        const isNext = i === firstOpen;
+        h += '<div class="buy t' + s.tier + (s.done ? ' done' : '') + '">' + tag(s.tier) + '<div class="nm">' + s.name + '<div class="lv">level ' + s.from + ' to ' + s.to + '</div></div>' +
+          '<div class="cost">' + fmt(s.cost) + '</div><button type="button" class="donebtn' + (isNext ? ' primary' : '') + '" data-step="' + i + '"' + (isNext ? '' : ' disabled title="Finish the step above first"') + '>Done</button></div>';
+      });
+      h += '<div class="row2" style="margin-top:10px"><button type="button" id="btnAllDone">Mark all done</button><span class="note">Expect to clear about ' + wl(PLAN.x) + ' after these.</span></div>';
+    } else if (PLAN.view === 'finish') {
+      h = '<h2>Goal run</h2><p>Your build can reach W' + n.goal + '. A run takes about ' + dur(prof.tTarget) + '. No more purchases are needed.</p>';
+    } else if (PLAN.view === 'prestige') {
+      h = '<h2>Prestige for P' + PLAN.tier + '</h2><p>Your build can reach wave ' + PLAN.target + ' in about ' + dur(prof.tTarget) + '. Prestige when the run gets there. It resets non-gem upgrades and currency.</p>' +
+        '<div class="row2"><button type="button" class="primary" id="btnPrestigeDone">Prestige done</button></div>';
+    } else {
+      const ci = PLAN.ci;
+      h = '<h2>Next upgrade set</h2><div class="waitbig" id="ciClock">' + (ci.t <= 0 ? 'Ready now' : 'Ready around ' + shortClock(ci.at)) + '</div>' +
+        '<div class="cdline"><b class="cd" id="ciCd"' + (ci.t <= 0 ? ' hidden' : '') + ' data-at="' + ci.at + '">' + fmtIn(ci.at - Date.now()) + '</b> <span id="ciNeed">' + ciNeedText(ci) + '</span></div>' +
+        '<div class="nxlabel">Currency you hold. These fill in with estimates from your expected gains. Type a number to use your own.</div><div class="nxrow">' +
+        [1, 2, 3, 4].map(t => '<label class="nf t' + t + '"><b>T' + t + '</b><input class="int" type="text" inputmode="numeric" pattern="[0-9]*" id="nx_c' + t + '" value="' + Math.max(0, Math.round(ci.held[t - 1])) + '" autocomplete="off" enterkeyhint="done"></label>').join('') + '</div>' +
+        '<div class="row2"><button type="button" class="primary" id="btnCheckinDone">Show my upgrade set</button></div>';
+    }
+    el.innerHTML = h;
+    el.querySelectorAll('.donebtn').forEach(b => b.addEventListener('click', () => doneStep(+b.getAttribute('data-step'))));
+    const all = $('#btnAllDone'); if (all) all.addEventListener('click', () => { PLAN.steps.forEach((s, i) => { if (!s.done) applyStep(i); }); finishStepUpdate(); });
+    const b1 = $('#btnCheckinDone'); if (b1) b1.addEventListener('click', checkinDone);
+    const b2 = $('#btnPrestigeDone'); if (b2) b2.addEventListener('click', prestigeDone);
+    [1, 2, 3, 4].forEach(t => {
+      const box = $('#nx_c' + t); if (!box) return;
+      box.addEventListener('focus', () => setTimeout(() => { try { box.select(); } catch (e) { /* ignore */ } }, 0));
+      box.addEventListener('input', () => {
+        const raw = box.value.trim();
+        OV[t - 1] = raw === '' ? null : parseInt(raw, 10);          // typing marks this box as the player's own number
+        PLAN.ci = dynCheckin();
+        updateCiText();
+      });
+      box.addEventListener('blur', () => { if (OV[t - 1] == null && PLAN.ci) box.value = Math.max(0, Math.round(PLAN.ci.est[t - 1])); });
+    });
+    updateStatusCheckin();
+    renderPlan();
+  }
+  function applyStep(i) {
+    const s = PLAN.steps[i]; if (s.done) return;
+    S.cur[s.tier - 1] = Math.max(0, Math.round(num(S.cur[s.tier - 1], 0) - s.cost));
+    S.lv[s.id] = s.to;
+    S.curAt = Date.now();
+    s.done = true;
+  }
+  function finishStepUpdate() { syncInputs(); save(); refreshRows(); renderStep(); }
+  function doneStep(i) { applyStep(i); finishStepUpdate(); }
+  function checkinDone() {
+    for (let t = 1; t <= 4; t++) S.cur[t - 1] = Math.max(0, parseInt($('#nx_c' + t).value, 10) || 0);
+    OV = [null, null, null, null];
+    S.lastCheckin = Date.now(); S.curAt = S.lastCheckin;
+    syncInputs(); save(); refreshRows(); compute();
+  }
+  function prestigeDone() {
+    OV = [null, null, null, null];
+    S.P = PLAN.tier; S.lv = {}; S.cur = [0, 0, 0, 0]; S.lastCheckin = null; S.curAt = Date.now();
+    save(); buildInputs(); compute();
+  }
+
+  /* ---------- Upgrade Plan: always the next upgrade set and the wait before it ---------- */
+  function buildBlocks(ev) {
+    const out = []; let prevT = ev[0].t;
+    ev.slice(1).forEach(e => {
+      if (e.type === 'prestige') { out.push({ type: 'prestige', e }); prevT = e.t; return; }
+      out.push({ type: 'checkin', e, gap: e.t - prevT });
+      out.push({ type: 'buy', e });
+      if (e.finish != null) out.push({ type: 'goal', e });
+      prevT = e.t;
+    });
+    return out;
+  }
+  function blockHtml(b, live) {
+    const e = b.e, n = PLAN.n;
+    if (b.type === 'prestige') return '<div class="tl pres"><div class="tlh">Prestige</div><p>At wave ' + e.wave + ' for P' + e.to + ', after the purchases above.</p></div>';
+    if (b.type === 'goal') return '<div class="tl pres"><div class="tlh">Goal</div><p>The next run reaches W' + n.goal + '.</p></div>';
+    if (b.type === 'checkin') {
+      if (live && PLAN.ci) {
+        const ci = PLAN.ci;
+        return '<div class="tl chk"><div class="tlh">Let currency build</div><div class="tlw"><span class="cd" data-at="' + ci.at + '">' + fmtIn(ci.at - Date.now()) + '</span> &middot; ' + (ci.t <= 0 ? 'ready now' : 'ready around ' + shortClock(ci.at)) + '</div><p>' + ciNeedText(ci) + '</p></div>';
+      }
+      return '<div class="tl chk"><div class="tlh">Let currency build</div><div class="tlw">About ' + durShort(b.gap) + ' after the set above</div><p>You should hold about ' + curLine(e.before) + '.</p></div>';
+    }
+    const m = mergeSteps(e.buys);
+    if (!m.length) return '<div class="tl buyc quiet"><div class="tlh">Upgrade set</div><p>Nothing worth buying yet. You should still clear about ' + wl(e.x) + '.</p></div>';
+    return '<div class="tl buyc"><div class="tlh">Upgrade set</div>' + m.map(s => '<div class="step">' + tag(s.tier) + ' ' + s.name + ' <span class="muted">level ' + s.from + ' to ' + s.to + ', ' + fmt(s.cost) + '</span></div>').join('') +
+      '<p class="expect">Then you should clear about ' + wl(e.x) + '.</p></div>';
+  }
+  function renderPlan() {
+    const el = $('#planPanel'); if (!el || !PLAN) return;
+    const skip = PLAN.view === 'buy' ? 0 : 1;           // the Next step panel already shows the current block
+    const show = PLAN.blocks.slice(skip, skip + 2);
+    let h = '<h2>Upgrade Plan</h2>';
+    if (!show.length) h += '<p class="note">Nothing further planned.</p>';
+    else h += '<div class="timeline">' + show.map((b, i) => blockHtml(b, skip === 0 && i === 0)).join('') + '</div>';
+    el.innerHTML = h;
+  }
+
+  /* ---------- render ---------- */
+  function render(n, R) {
+    const res = R.chosen;
+    const slack = n.remainH - (res.completionH || 0);
+    const ev = res.events;
+    const first = ev.find(e => e.type === 'checkin');
+
+    const sbMain = $('#sbMain');
+    sbMain.classList.toggle('ok', res.attainable); sbMain.classList.toggle('bad', !res.attainable);
+    if (res.attainable) {
+      $('#sbLab').textContent = 'Reachable in time';
+      $('#sbBig').textContent = 'W' + n.goal + ' in ' + dur(res.completionH);
+      $('#sbSub').textContent = dur(slack) + ' to spare';
+    } else {
+      $('#sbLab').textContent = 'Out of reach in time';
+      $('#sbBig').textContent = 'Max wave: W' + res.maxWave;
+      const need = R.needH ? 'W' + n.goal + ' needs ' + dur(R.needH) + ', ' + dur(R.needH - n.remainH) + ' late.' : 'Tops out near W' + (R.extMax || res.maxWave) + ' with more time.';
+      const gemLine = R.maxed ? (R.maxed.r.attainable ? 'Maxed gems (P' + n.P + ') reach W' + n.goal + ' in ' + dur(R.maxed.r.completionH) : 'Maxed gems (P' + n.P + '): W' + R.maxed.r.maxWave) : '';
+      $('#sbSub').innerHTML = (gemLine ? gemLine + '<br>' : '') + need;
+    }
+
+    const nextEv = ev[1] && ev[1].type === 'checkin' ? ev[1] : null;
+    PLAN = { steps: mergeSteps(first.buys), target: first.target, tier: first.tier, x: first.x, hp: first.hp, nextWait: first.gap || 1, nextEv, blocks: buildBlocks(ev), n, R };
+
+    // one-line summary under the time-between-sets setting
+    const sets = ev.filter(e => e.type === 'checkin' && e.buys.length).length;
+    lastIvDesc = (S.goal > 1000 ? 'Planned as W1000, the furthest the model covers. ' : '') + 'Expected max wave W' + res.maxWave + ' in ' + sets + ' upgrade sets' +
+      (res.attainable ? ', done in about ' + dur(res.completionH) + '.' : '. W' + n.goal + ' is out of reach in time.');
+    const ivDesc = $('#ivDesc'); if (ivDesc) ivDesc.textContent = lastIvDesc;
+
+    const html = [];
+    html.push('<section class="panel" id="stepPanel"></section>');
+    html.push('<section class="panel" id="planPanel"></section>');
+    let h = '';
+
+    // stats and breakpoints
+    const stNow = E.computeStats(n.P, n.gems, n.lv);
+    const lvAfter = Object.assign({}, n.lv);
+    first.buys.forEach(b => { lvAfter[b.id] = b.to; });
+    const stNext = E.computeStats(n.P, n.gems, lvAfter);
+    const rNow = E.evalBuild(stNow, 1001, 0), rNext = E.evalBuild(stNext, 1001, 0);
+    const runDur = h => { const s = Math.round(h * 3600), hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60; return hh ? hh + 'h ' + mm + 'm' : mm + 'm ' + (ss < 10 ? '0' : '') + ss + 's'; };
+    const rowsS = [['Theoretical max wave', rNow.x, rNext.x, wl], ['Average run length', rNow.runH, rNext.runH, runDur], ['Max HP', stNow.hp, stNext.hp, fmt], ['Attack damage', stNow.dmg, stNext.dmg, fmt], ['Attack speed', stNow.as, stNext.as, f2],
+      ['Move speed', stNow.ms, stNext.ms, f2], ['Event speed', stNow.ev, stNext.ev, v => f2(v) + 'x'], ['Crit chance', stNow.cc, stNext.cc, v => f2(v) + '%'],
+      ['Crit damage', stNow.cd, stNext.cd, v => f2(v) + 'x'], ['Block chance', stNow.blk, stNext.blk, v => f2(v) + '%'],
+      ['Prestige multiplier', stNow.mult, stNext.mult, v => f2(v) + 'x'], ['Enemy attack speed cut', stNow.eas, stNext.eas, v => '-' + f2(v)], ['Enemy damage cut', stNow.edmg, stNext.edmg, v => '-' + f2(v)]];
+    h = '<h3>Your stats</h3><div class="scroll"><table><tr><th>Stat</th><th>Now</th><th>After buying</th></tr>' +
+      rowsS.map(s => '<tr><td>' + s[0] + '</td><td>' + s[3](s[1]) + '</td><td>' + s[3](s[2]) + '</td></tr>').join('') + '</table></div>';
+    const bw = E.MIL.map(m => m[0]).concat([200, 250, n.goal]).filter((w, i, a) => a.indexOf(w) === i && w <= 1000).sort((a, b) => a - b);
+    h += '<h3 style="margin-top:14px">One-hit damage needed</h3><div class="scroll"><table><tr><th>Wave</th><th>Enemy HP</th><th>Your damage</th><th>Status</th></tr>';
+    bw.forEach(w => {
+      const hp = E.EHP[w], ok = stNext.dmg >= hp;
+      h += '<tr><td>W' + w + '</td><td>' + fmt(hp) + '</td><td>' + fmt(stNext.dmg) + '</td><td class="' + (ok ? 'ok-t' : 'bad-t') + '">' + (ok ? 'one-shot' : 'short by ' + fmt(hp - stNext.dmg)) + '</td></tr>';
+    });
+    h += '</table></div><h3 style="margin-top:14px">Enemy stats</h3><div class="scroll"><table><tr><th>Wave</th><th>HP</th><th>Damage</th><th>Atk speed</th><th>Crit</th><th>Crit mult</th></tr>';
+    bw.forEach(w => {
+      const e = E.enemyAt(w, { edmg: 0, eas: 0, ecc: 0, ecd: 0 });
+      h += '<tr><td>W' + w + '</td><td>' + fmt(e.hp) + '</td><td>' + e.dmg + '</td><td>' + f2(e.as) + '</td><td>' + f2(e.cc) + '%</td><td>' + f2(e.cm) + 'x</td></tr>';
+    });
+    h += '</table></div>';
+    html.push(det('stats', 'Stats and Breakpoints', h, false));
+
+    html.push(det('how', 'How it works',
+      '<h3>Set up once</h3><ol class="plain">' +
+      '<li><b>Event Settings:</b> set your wave goal. The time left comes from your device clock.</li>' +
+      '<li><b>Prestige:</b> enter your current prestige tier.</li>' +
+      '<li><b>Event Currency:</b> enter the currency you hold right now.</li>' +
+      '<li><b>Gems:</b> tick Use gems if you own gem upgrades, then enter your levels. The Rec. column shows the cheapest levels that still reach your goal in time.</li>' +
+      '<li><b>Upgrades:</b> enter the level of every upgrade you own. Locked rows open with your prestige tier or once the row above has a level.</li>' +
+      '</ol><h3 style="margin-top:12px">Then, every round</h3><ol class="plain">' +
+      '<li>Under <b>Buy now</b>, buy each upgrade in the game and press Done.</li>' +
+      '<li>Let the game run until the time shown, so your event currency builds up.</li>' +
+      '<li>The currency boxes fill in with an estimate. Type your real amounts if you like. A box you type in keeps your number. Then press <b>Show my upgrade set</b>.</li>' +
+      '<li>When the planner says <b>Prestige</b>, prestige in the game and press Prestige done.</li>' +
+      '</ol><p class="note" style="margin-top:10px">You only need to come back to Setup when something changes outside the planner, such as new gem levels. Use Import/Export at the top to move your setup to another device.</p>', false));
+
+    $('#results').innerHTML = html.join('');
+    renderStep();
+  }
+
+  /* ---------- gems ---------- */
+  function gemRange(from, to) { let c = 0; for (let l = from + 1; l <= to; l++) c += E.gemCost(l); return c; }
+  function gemSetCost(owned, rec) {
+    return gemRange(owned.hp, rec.hp) + gemRange(owned.atk, rec.atk) + Math.max(0, rec.speed - owned.speed) * 500 + (rec.x2 && !owned.x2 ? 500 : 0);
+  }
+  // Cumulative sets in the order they pay off (2x currency, event speed, HP, then attack), ending at the maximum.
+  function gemLadder(own, mx) {
+    const g = Object.assign({}, own), steps = [];
+    const bump = (k, to) => { const t = Math.min(to, mx[k]); if (g[k] < t) { g[k] = t; steps.push(Object.assign({}, g)); } };
+    bump('x2', 1); bump('speed', 1); bump('hp', 3); bump('speed', 2); bump('hp', 6); bump('speed', 3);
+    for (let to = 9; to < mx.hp + 3; to += 3) bump('hp', to);
+    for (let to = 3; to < mx.atk + 3; to += 3) bump('atk', to);
+    return steps;
+  }
+  function applyGemInfo(info) {
+    const note = $('#gemNote'); if (!note) return;
+    note.textContent = info.note;
+    if (!S.useGems) return;
+    const set = (id, t) => { const el = $('#' + id); if (el) el.textContent = t; };
+    set('rec_hp', info.rec.hp); set('rec_atk', info.rec.atk); set('rec_speed', info.rec.speed); set('rec_x2', info.rec.x2 ? 'yes' : 'no');
+    const og = normalized().ownedGems;
+    [['hp', info.rec.hp > og.hp], ['atk', info.rec.atk > og.atk], ['speed', info.rec.speed > og.speed], ['x2', info.rec.x2 > og.x2]].forEach(([k, need]) => {
+      const el = $('#rec_' + k); if (el) el.classList.toggle('need', need);
+    });
+    const s = $('#gemSummary'); if (s) s.innerHTML = info.summary;
+  }
+  const GEM_SLACK = 0.9; // recommended gems should finish with at least 10% of the event to spare
+  function gemWork(n, R, my) {
+    // The recommendation is the cheapest gem set that reaches the goal from your current state and the time left.
+    // It is worked out from zero gems, so it does not depend on the levels you entered.
+    function* work() {
+      const none = { atk: 0, hp: 0, speed: 0, x2: 0 };
+      const own = S.useGems ? n.ownedGems : none;
+      const mx = { atk: n.gm.atk, hp: n.gm.hp, speed: n.gm.speed, x2: 1 };
+      const feas = r => r.attainable && r.completionH <= n.remainH * GEM_SLACK;
+      // fixed route and Auto settings, so the recommendation does not shift when the levels you entered change
+      const run = g => sim(withGems(n, g), { G: 3 }, 20, null, ALT_PATHS[0].path);
+      // what the plan itself says without gems (for the note); the recommendation uses the fixed settings above
+      let noGem = R.chosen;
+      if (S.useGems) { yield; noGem = sim(withGems(n, none), R.policy.arg, R.lambda, null, R.pathArg); }
+      yield;
+      const noGemRec = run(none);
+      let maxedRes = null;
+      let rec, recRes, state;
+      if (feas(noGemRec)) { rec = none; recRes = noGemRec; state = 'none'; }
+      else {
+        yield; maxedRes = run(mx);
+        if (!feas(maxedRes)) { rec = mx; recRes = maxedRes; state = 'short'; }
+        else {
+          const steps = gemLadder(none, mx);
+          let lo = 0, hi = steps.length - 1, hiRes = maxedRes;
+          while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            yield;
+            const r = run(steps[mid]);
+            if (feas(r)) { hi = mid; hiRes = r; } else lo = mid + 1;
+          }
+          rec = steps[hi]; recRes = hiRes; state = 'found';
+          // shave: try dropping each gem one step while it still reaches the goal with room to spare
+          let tries = 0;
+          for (const dim of ['x2', 'speed', 'hp', 'atk']) {
+            while (tries < 5 && rec[dim] > 0) {
+              const cand = Object.assign({}, rec);
+              cand[dim] = Math.max(0, rec[dim] - (dim === 'hp' || dim === 'atk' ? 3 : 1));
+              yield; tries++;
+              const r = run(cand);
+              if (feas(r)) { rec = cand; recRes = r; } else break;
+            }
+          }
+        }
+      }
+      return { noGem, own, rec, recRes, maxedRes, state, mx, none };
+    }
+    const gen = work();
+    function step() {
+      if (my !== token) return;
+      const r = gen.next();
+      if (!r.done) { setTimeout(step, 0); return; }
+      const { noGem, own, rec, recRes, state, mx, none } = r.value;
+      const recCost = gemSetCost(own, rec), maxCost = gemSetCost(own, mx), fullRecCost = gemSetCost(none, rec);
+      const goalTxt = 'W' + n.goal;
+      let note = noGem.attainable
+        ? 'Optional. ' + goalTxt + ' is reachable without gems (about ' + dur(noGem.completionH) + ').'
+        : 'Without gems ' + goalTxt + ' is out of reach (best W' + noGem.maxWave + ').' + (state === 'short' ? ' Even maxed gems fall short (best W' + recRes.maxWave + ').' : ' Cheapest fix: ' + fmt(fullRecCost) + ' gems.');
+      if (!S.useGems && !noGem.attainable) note += ' Turn on Use gems for the levels.';
+      const summary = 'Recommended costs ' + fmt(recCost) + ' more gems. Maxing everything costs ' + fmt(maxCost) + '.' + (state !== 'none' && recCost === 0 ? ' You already own this much.' : '');
+      lastGemInfo = { note, rec, summary };
+      if (my === token) applyGemInfo(lastGemInfo);
+    }
+    step();
+  }
+
+  /* ---------- whole numbers only ---------- */
+  let tipEl = null, tipTimer = null;
+  function numTip(el) {
+    if (!tipEl) { tipEl = document.createElement('div'); tipEl.id = 'numTip'; tipEl.setAttribute('role', 'status'); document.body.appendChild(tipEl); }
+    tipEl.textContent = 'Numbers only';
+    const r = el.getBoundingClientRect();
+    tipEl.style.left = Math.max(8, Math.min(window.innerWidth - 130, r.left + window.scrollX)) + 'px';
+    tipEl.style.top = (r.bottom + window.scrollY + 6) + 'px';
+    tipEl.classList.add('show');
+    clearTimeout(tipTimer); tipTimer = setTimeout(() => tipEl.classList.remove('show'), 1800);
+  }
+  const isInt = el => el instanceof HTMLInputElement && el.classList.contains('int');
+  document.addEventListener('beforeinput', e => {
+    const el = e.target; if (!isInt(el) || !e.inputType || e.inputType.indexOf('insert') !== 0) return;
+    let data = e.data;
+    if (data == null && e.dataTransfer) data = e.dataTransfer.getData('text');
+    if (data && /\D/.test(data)) {
+      e.preventDefault(); numTip(el);                       // the key never lands, and the field keeps focus
+      const digits = data.replace(/\D/g, '');               // a pasted "1,500" still gives 1500
+      if (digits) { el.setRangeText(digits, el.selectionStart, el.selectionEnd, 'end'); el.dispatchEvent(new Event('input', { bubbles: true })); }
+    }
+  }, true);
+  document.addEventListener('input', e => {                 // safety net for keyboards that do not report the typed character
+    const el = e.target; if (!isInt(el)) return;
+    const v = el.value, clean = v.replace(/\D/g, '');
+    if (v !== clean) {
+      const pos = Math.max(0, (el.selectionStart == null ? clean.length : el.selectionStart) - (v.length - clean.length));
+      el.value = clean; try { el.setSelectionRange(pos, pos); } catch (err) { /* ignore */ }
+      numTip(el);
+    }
+  }, true);
+
+  /* ---------- light / dark mode ---------- */
+  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  function effectiveTheme() { return S.ui.theme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+  function applyTheme() {
+    const t = effectiveTheme();
+    document.documentElement.setAttribute('data-theme', t);
+    const b = $('#btnTheme');
+    if (b) { b.innerHTML = t === 'dark' ? SUN : MOON; b.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'); b.title = t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'; }
+  }
+  $('#btnTheme').addEventListener('click', () => { S.ui.theme = effectiveTheme() === 'dark' ? 'light' : 'dark'; save(); applyTheme(); });
+  if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (!S.ui.theme) applyTheme(); }); } catch (e) { /* older browsers */ } }
+  applyTheme();
+
+  /* ---------- setup code: a short string that carries the whole setup to another device ---------- */
+  const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  function putVar(arr, n) { n = Math.max(0, Math.floor(n)); while (n >= 128) { arr.push((n % 128) | 128); n = Math.floor(n / 128); } arr.push(n); }
+  function getVar(bytes, pos) {
+    let n = 0, mul = 1, b;
+    do { if (pos.i >= bytes.length) throw new Error('short'); b = bytes[pos.i++]; n += (b & 127) * mul; mul *= 128; } while (b & 128);
+    return n;
+  }
+  function csum(bytes) { let c = 17; for (const b of bytes) c = (c * 31 + b) & 255; return c; }
+  function bytesToB64(bytes) {
+    let out = '';
+    for (let i = 0; i < bytes.length; i += 3) {
+      const b0 = bytes[i], b1 = i + 1 < bytes.length ? bytes[i + 1] : 0, b2 = i + 2 < bytes.length ? bytes[i + 2] : 0, n = (b0 << 16) | (b1 << 8) | b2;
+      out += B64[(n >> 18) & 63] + B64[(n >> 12) & 63];
+      if (i + 1 < bytes.length) out += B64[(n >> 6) & 63];
+      if (i + 2 < bytes.length) out += B64[n & 63];
+    }
+    return out;
+  }
+  function b64ToBytes(s) {
+    const bytes = [];
+    for (let i = 0; i < s.length; i += 4) {
+      const v = Array.from(s.slice(i, i + 4)).map(c => { const k = B64.indexOf(c); if (k < 0) throw new Error('char'); return k; });
+      if (v.length === 1) throw new Error('length');
+      const n = (v[0] << 18) | (v[1] << 12) | ((v[2] || 0) << 6) | (v[3] || 0);
+      bytes.push((n >> 16) & 255);
+      if (v.length > 2) bytes.push((n >> 8) & 255);
+      if (v.length > 3) bytes.push(n & 255);
+    }
+    return bytes;
+  }
+  function exportCode() {
+    const n = normalized();
+    const iv = n.interval === 'auto' ? 0 : INTERVALS.indexOf(n.interval) + 1;
+    const bytes = [1, (S.useGems ? 1 : 0) | (n.ownedGems.x2 ? 2 : 0) | (Math.max(0, iv) << 2)];
+    putVar(bytes, n.P); putVar(bytes, n.goal);
+    putVar(bytes, n.ownedGems.hp); putVar(bytes, n.ownedGems.atk); putVar(bytes, n.ownedGems.speed);
+    n.cur.forEach(c => putVar(bytes, Math.round(c)));
+    let zeros = 0;                                                   // runs of zero levels cost one byte
+    E.UPG.forEach(up => {
+      const L = Math.min(127, n.lv[up.id]);
+      if (L === 0) { if (++zeros === 127) { bytes.push(128 | zeros); zeros = 0; } }
+      else { if (zeros) { bytes.push(128 | zeros); zeros = 0; } bytes.push(L); }
+    });
+    if (zeros) bytes.push(128 | zeros);
+    bytes.push(csum(bytes));
+    return bytesToB64(bytes);
+  }
+  function parseCode(str) {
+    const s = str.replace(/\s+/g, '');
+    if (!s) throw new Error('empty');
+    const bytes = b64ToBytes(s);
+    if (bytes.length < 10) throw new Error('short');
+    const ck = bytes.pop();
+    if (csum(bytes) !== ck) throw new Error('check');
+    const pos = { i: 0 };
+    if (bytes[pos.i++] !== 1) throw new Error('version');
+    const flags = bytes[pos.i++];
+    const o = { useGems: !!(flags & 1), x2: flags & 2 ? 1 : 0, iv: flags >> 2 };
+    o.P = getVar(bytes, pos); o.goal = getVar(bytes, pos);
+    o.hp = getVar(bytes, pos); o.atk = getVar(bytes, pos); o.speed = getVar(bytes, pos);
+    o.cur = [0, 1, 2, 3].map(() => getVar(bytes, pos));
+    o.lv = [];
+    while (o.lv.length < E.UPG.length) {
+      if (pos.i >= bytes.length) throw new Error('short');
+      const b = bytes[pos.i++];
+      if (b & 128) for (let k = 0; k < (b & 127); k++) o.lv.push(0); else o.lv.push(b);
+    }
+    if (o.lv.length !== E.UPG.length || pos.i !== bytes.length) throw new Error('size');
+    return o;
+  }
+  function applyCode(o) {
+    S.P = o.P; S.goal = Math.max(5, o.goal);
+    S.interval = o.iv >= 1 && o.iv <= INTERVALS.length ? String(INTERVALS[o.iv - 1]) : 'auto';
+    S.useGems = o.useGems; S.gems = { hp: o.hp, atk: o.atk, speed: o.speed, x2: o.x2 };
+    S.cur = o.cur.slice(); S.lv = {}; E.UPG.forEach((up, i) => { S.lv[up.id] = o.lv[i]; });
+    S.curAt = Date.now(); S.lastCheckin = null; OV = [null, null, null, null];
+    save(); lastGemInfo = null; buildInputs(); compute();
+  }
+  const dlg = $('#codeDlg');
+  $('#btnCode').addEventListener('click', () => {
+    $('#cdOut').value = exportCode(); $('#cdIn').value = ''; $('#cdCopied').textContent = ''; $('#cdMsg').textContent = '';
+    dlg.showModal();
+  });
+  $('#cdClose').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  $('#cdCopy').addEventListener('click', () => {
+    const out = $('#cdOut'), done = () => { $('#cdCopied').textContent = 'Copied'; };
+    out.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(out.value).then(done, () => { try { document.execCommand('copy'); done(); } catch (e) { /* ignore */ } });
+    else { try { document.execCommand('copy'); done(); } catch (e) { /* ignore */ } }
+  });
+  $('#cdImport').addEventListener('click', () => {
+    const msg = $('#cdMsg');
+    let o;
+    try { o = parseCode($('#cdIn').value); } catch (e) { msg.textContent = 'That code does not look right. Check that all of it was copied.'; return; }
+    if (!window.confirm('Replace your current setup with this code?')) return;
+    applyCode(o); dlg.close();
+  });
+
+  /* ---------- manual update fallback ---------- */
+  $('#btnUpdate').addEventListener('click', () => {
+    const a = document.activeElement; if (a && a.blur) a.blur();
+    if (window.matchMedia('(max-width: 900px)').matches) { setTab('plan'); window.scrollTo(0, 0); }
+    compute();
+  });
+
+  buildInputs();
+  compute();
+})();
+
+</script>
+</body>
+</html>
